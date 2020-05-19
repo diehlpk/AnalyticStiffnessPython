@@ -4,109 +4,141 @@
 import numpy as np 
 from scipy import linalg
 
-nodes = []
-neighbors = []
-matrix = np.zeros((len(nodes),len(nodes)))
-
-h = 0.1
-delta = 3*h
-
-C = 1
-beta = 1
-
-VB = h
+np.set_printoptions(precision=1)
 
 
-def length(x,y): 
-    """ Computes the length between to nodes
+class Compute:
 
-    Keyword arguments:
-    x -- the node x
-    y -- the node y
+    # Data
+    nodes = []
+    neighbors = []
+    matrix = []
+    uCurrent = []
+    uAct = []
+    uInitial = []
+    b = []
+    f = []
 
-    return the length
-    """
-    return np.sqrt((y-x) * (y-x)) 
+    # Config
+    h = 0.1
+    delta = 3*h
+    C = 1
+    beta = 1
+    VB = h
 
-def S(i,j,u):
-    """ Computes the stretch between node x and nod y
-
-    Keyword arguments:
-    x -- the node x
-    y -- the node y
-    u -- the displacement vector 
-
-    return the stretch
-    """
-    return  (u[j] - u[i]) / length(nodes[i],nodes[j])  *  (nodes[j]-nodes[i]) / (length(nodes[i],nodes[j]))
-
-def w(r):
-    """ Influence function
-
-    Keyword arguments:
-    r -- the initial length between node x and y
-
-    return the weight
-    """
-    return 1
-
-def f1(r):
-    return 2*r*C*beta* np.exp(-beta * r * r )
-
-def f2(r):
-    return 2*C*beta*np.exp(-r*r*beta)-4*C*r*r*beta*beta*np.exp(-r*r*beta)
-
-def A(i,j,u):
-    r = np.sqrt(length(i,j)) * S(i,j,u)
-    return (2./VB) * w(length(nodes[i],nodes[j])/delta)  * f2(r) * ( 1. / length(nodes[i],nodes[j]))  *  (nodes[j]-nodes[i]) / (length(nodes[i],nodes[j]))
-
-def L(i,j,u):
-    r = np.sqrt(length(i,j)) * S(i,j,u)
-    return (2./VB) * w(length(nodes[i],nodes[j])/delta)  * f1(r) * ( 1. / length(nodes[i],nodes[j]))  *  (nodes[j]-nodes[i]) / (length(nodes[i],nodes[j]))
-
-
-def searchNeighbors():
-    for i in range(0,len(nodes)):
-        neighbors.append([])
-        for j in range(0,len(nodes)):
-            if i != j and abs(nodes[j]-nodes[i]) < delta:
-                neighbors[i].append(j)
-
-
-def assemblymatrix():
-    matrix = np.zeros((10,10))
-    for i in range(0,len(nodes)):
-        for j in neighbors[i]:
-            matrix[i][j] = A(i,j,u)
-            matrix[i][i] -= A(i,j,u)
-    return matrix
-
-# Generate the mesh
-n = int(1/h)
-nodes = np.linspace(0,1,n)
-
-# Search neighbors
-searchNeighbors()
-
-# Initialize 
-u = np.zeros(len(nodes))
-b = np.zeros(len(nodes))
-b[0] = -10
-b[len(nodes)-1] = 10
-
-
-for i in range (0,3):
-    # Assemble stiffness matrix
-    matrix = assemblymatrix()
-    f = np.zeros(len(nodes))
-    # Generate the left-hand side
-    for i in range(0,len(nodes)):
-        f[i] = b[i]
-        for j in neighbors[i]:
-            f[i] += L(i,j,u)
-    u = linalg.solve(matrix, f)
-    print(i)
+    def __init__(self):
+        # Generate the mesh
+        n = int(1/self.h)
+        self.nodes = np.linspace(0,1,n) 
+        # Search neighbors
+        self.searchNeighbors()
+        # Initialize 
+        self.uCurrent = np.random.random_sample(size =(len(self.nodes))) 
+        self.uAct = np.zeros(len(self.nodes))
+        self.b = np.zeros(len(self.nodes))
+        self.b[len(self.nodes)-1] = 10 / self.h
+        self.b[0] = -10 / self.h
+        self.f = np.zeros(len(self.nodes))
+        self.residual()
+        print("Residual with initial guess:",np.linalg.norm(self.f))
 
 
 
-print(u)
+    def searchNeighbors(self):
+        for i in range(0,len(self.nodes)):
+            self.neighbors.append([])
+            for j in range(0,len(self.nodes)):
+                if i != j and abs(self.nodes[j]-self.nodes[i]) < self.delta:
+                    self.neighbors[i].append(j)
+
+    def L(self,i,j):
+        nodes = self.nodes
+        r = np.sqrt(self.length(i,j)) * self.S(i,j,self.uCurrent)
+        return (2./self.VB) * self.w(self.length(nodes[i],nodes[j])/self.delta)  * self.f1(r) * ( 1. / self.length(nodes[i],nodes[j])) *  self.S(i,j,self.uCurrent) *  (nodes[j]-nodes[i]) / (self.length(nodes[i],nodes[j]))
+
+
+    def residual(self):
+        for i in range(0,len(self.nodes)):
+            self.f[i] = -self.b[i]
+            for j in self.neighbors[i]:
+                self.f[i] -= self.L(i,j)
+
+
+
+    def length(self,x,y): 
+        """ Computes the length between to nodes
+
+        Keyword arguments:
+        x -- the node x
+        y -- the node y
+
+        return the length
+        """
+        return np.sqrt((y-x) * (y-x)) 
+
+ 
+
+    def S(self,i,j,u):
+        """ Computes the stretch between node x and nod y
+
+        Keyword arguments:
+        x -- the node x
+        y -- the node y
+        u -- the displacement vector 
+
+        return the stretch
+        """
+        nodes = self.nodes
+        return  (u[j] - u[i]) / self.length(nodes[i],nodes[j])  *  (nodes[j]-nodes[i]) / (self.length(nodes[i],nodes[j]))
+
+    def w(self,r):
+        """ Influence function
+
+        Keyword arguments:
+        r -- the initial length between node x and y
+
+        return the weight
+        """
+        return 1
+
+    def f1(self,r):
+        return 2*r*self.C*self.beta* np.exp(-self.beta * r * r )
+
+    def f2(self,r):
+        return 2*self.C*self.beta*np.exp(-r*r*self.beta)-4*self.C*r*r*self.beta*self.beta*np.exp(-r*r*self.beta)
+
+    def A(self,i,j):
+        nodes = self.nodes
+        r = np.sqrt(self.length(i,j)) * self.S(i,j,self.uCurrent)
+        return (2./self.VB) * self.w(self.length(nodes[i],nodes[j])/self.delta)  * self.f2(r) * ( 1. / self.length(nodes[i],nodes[j])) *  self.S(i,j,self.uCurrent)  *  (nodes[j]-nodes[i]) / (self.length(nodes[i],nodes[j]))
+
+
+    def assemblymatrix(self):
+        self.matrix = np.zeros((len(self.nodes),len(self.nodes)))
+        for i in range(0,len(self.nodes)):
+            for j in self.neighbors[i]:
+                self.matrix[i][j] =  self.A(i,j)
+                self.matrix[i][i] -= self.A(i,j)
+
+    def solve(self,maxIt,epsilion):
+
+
+        for i in range(0,5):
+
+            #print("uc",self.uCurrent)
+            self.assemblymatrix()
+            print(self.matrix)
+            self.residual()
+            self.uAct = linalg.solve(self.matrix, self.f)
+            self.uCurrent = self.uAct
+            print(self.f)
+            print(np.linalg.norm(self.f))
+
+        #print(self.uCurrent)
+        #self.residual()
+        #print(np.linalg.norm(self.f))
+    
+
+if __name__=="__main__": 
+    c = Compute()
+    c.solve(1,1)
