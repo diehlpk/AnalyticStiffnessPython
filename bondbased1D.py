@@ -5,6 +5,9 @@ import numpy as np
 from scipy import linalg
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+rc('text', usetex=True)
 
 np.set_printoptions(precision=4)
 mpl.style.use('seaborn')
