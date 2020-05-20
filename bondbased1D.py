@@ -4,9 +4,10 @@
 import numpy as np 
 from scipy import linalg
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 
-np.set_printoptions(precision=9)
-
+np.set_printoptions(precision=4)
+mpl.style.use('seaborn')
 
 class Compute:
 
@@ -21,7 +22,7 @@ class Compute:
 
     # Config
     h = 0.1
-    delta = 4*h
+    delta = 2*h
     C = 0.000001
     beta = 1
     VB = h
@@ -146,10 +147,10 @@ class Compute:
 
 
     def plot(self):
-        plt.plot(self.nodes,self.uCurrent)
+        plt.plot(self.nodes,self.uCurrent,color='#007FFF')
         plt.xlabel("Positon")
         plt.ylabel("Displacement")
-        plt.grid()
+        #plt.grid()
         plt.savefig("bond-based-1d.pdf")
 
 
