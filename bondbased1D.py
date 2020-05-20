@@ -126,13 +126,12 @@ class Compute:
 
     def solve(self,maxIt,epsilion):
 
-        #self.uCurrent += self.pertubation
         self.residual()
         print("Residual with intial guess",np.linalg.norm(self.f))
-        print("f",self.f)
+        it = 1
+        residual = np.finfo(np.float).max
 
-
-        for i in range(0,1):
+        while( residual > epsilion and it <= maxIt):
 
             self.assemblymatrix()
             self.matrix = np.delete(self.matrix,0,0)
@@ -140,7 +139,9 @@ class Compute:
             res = linalg.solve(self.matrix, np.delete(self.f,0))
             self.uCurrent = np.concatenate([[0],res])  
             self.residual()
-            print(np.linalg.norm(self.f))
+            residual = np.linalg.norm(self.f)
+            print("Iteration ",it," Residual: ",residual)
+            it += 1
 
 
 
@@ -156,5 +157,5 @@ class Compute:
 
 if __name__=="__main__": 
     c = Compute()
-    c.solve(1,1)
+    c.solve(10,1e-6)
     c.plot()
