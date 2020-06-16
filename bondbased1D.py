@@ -149,13 +149,6 @@ class Compute:
 
 if __name__=="__main__": 
 
-    #for i in range(2,13):
-    #    n = np.power(2,i)
-    #    print(n)
-    #    c = Compute(1/n)
-    #    c.solve(1000000,1e-5)
-    #    c.plot()
-
     c = Compute(1/2)
     c.solve(1000000,1e-11)
     #c.plot()
