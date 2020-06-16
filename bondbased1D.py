@@ -1,5 +1,5 @@
 #Protoype for the 1D bond-based analytic stiffness matrix
-#@author Patrick Diehl
+#@author Patrick Diehl (patrickdiehl@lsu.edu)
 #@date May 2020
 import numpy as np 
 from scipy import linalg
@@ -24,24 +24,36 @@ class Compute:
     pertubation = []
 
     # Config
-    h = 0.1
-    delta = 2*h
-    C = 0.000001
+    #h = 1
+    #delta = 3*h
+    C = 4000
     beta = 1
-    VB = h
-    V = h
-    eps = 1e-4
+    #VB = h
+    #V = h
+    #eps = 1e-4
 
-    def __init__(self):
+    def __init__(self,h):
         # Generate the mesh
-        n = int(1/self.h)
-        self.nodes = np.linspace(0,1,n) 
+        self.h = h
+        self.delta = 3*h
+        n = int(16/self.h) + 1
+        print(n)
+        self.V = np.empty(n)
+        self.V.fill(h)
+        self.V[0] = h/2
+        self.V[len(self.V)-1] = h/2
+
+        self.VB = 3*self.delta
+        self.nodes = np.linspace(0,16,n) 
         # Search neighbors
         self.searchNeighbors()
         # Initialize 
-        self.uCurrent = np.multiply(np.random.rand(len(self.nodes)),1e-5)
+        self.uCurrent = np.zeros(len(self.nodes))
+        #self.uCurrent = np.multiply(np.random.rand(len(self.nodes)),1e-2)
         self.b = np.zeros(len(self.nodes))
-        self.b[len(self.nodes)-1] = 1. / self.h *0.0000001
+        self.b[len(self.nodes)-1] = 40. / self.V[len(self.nodes)-1]
+        #self.b[len(self.nodes)-2] = 40. / self.V[len(self.nodes)-2] 
+        #self.b[len(self.nodes)-3] = 40. / self.V[len(self.nodes)-3]  
         self.f = np.zeros(len(self.nodes))
 
     def searchNeighbors(self):
@@ -54,7 +66,7 @@ class Compute:
     def L(self,i,j):
         nodes = self.nodes
         r = np.sqrt(self.length(i,j)) * self.S(i,j)
-        return (2./self.VB) * self.w(self.length(nodes[i],nodes[j]))/self.delta  * self.f1(r) / np.sqrt(self.length(nodes[i],nodes[j])) *  self.S(i,j) *  self.e(i,j) * self.V
+        return (2./self.VB) * self.w(self.length(nodes[i],nodes[j]))/self.delta  * self.f1(r) / self.length(nodes[i],nodes[j])  *  self.e(i,j) * self.V[j]
 
 
     def residual(self):
@@ -62,44 +74,16 @@ class Compute:
             self.f[i] = self.b[i]
             for j in self.neighbors[i]:
                 self.f[i] += self.L(i,j)
-
-
+        self.f[0] = 0
 
     def length(self,x,y): 
-        """ Computes the length between to nodes
-
-        Keyword arguments:
-        x -- the node x
-        y -- the node y
-
-        return the length
-        """
         return np.sqrt((y-x) * (y-x)) 
 
- 
-
     def S(self,i,j):
-        """ Computes the stretch between node x and nod y
-
-        Keyword arguments:
-        x -- the node x
-        y -- the node y
-        u -- the displacement vector 
-
-        return the stretch
-        """
         nodes = self.nodes
-        #print("S",i,j,np.dot((self.uCurrent[j] - self.uCurrent[i]) / self.length(nodes[i],nodes[j]),self.e(i,j)))
         return  np.dot((self.uCurrent[j] - self.uCurrent[i]) / self.length(nodes[i],nodes[j]),self.e(i,j))
 
     def w(self,r):
-        """ Influence function
-
-        Keyword arguments:
-        r -- the initial length between node x and y
-
-        return the weight
-        """
         return 1
 
     def e(self,i,j):
@@ -114,7 +98,7 @@ class Compute:
     def A(self,i,j):
         nodes = self.nodes
         r = np.sqrt(self.length(i,j)) * self.S(i,j)
-        return  (2./self.VB) * self.w(self.length(nodes[i],nodes[j]))/self.delta  * self.f2(r)  * ( 1. / self.length(nodes[i],nodes[j]))  * self.E(i,j) * self.V
+        return  (2./self.VB) * self.w(self.length(nodes[i],nodes[j]))/self.delta  * self.f2(r)  * ( 1. / self.length(nodes[i],nodes[j]))  * self.E(i,j) 
 
 
     def assemblymatrix(self):
@@ -135,31 +119,43 @@ class Compute:
         it = 1
         residual = np.finfo(np.float).max
 
-        while( residual > epsilion and it <= maxIt):
+        while( residual > epsilion):
 
             self.assemblymatrix()
+            b = np.copy(self.f)
+
+            #Remove the column and row for the first fixed node
             self.matrix = np.delete(self.matrix,0,0)
             self.matrix = np.delete(self.matrix,0,1)
-            res = linalg.solve(self.matrix, np.delete(self.f,0))
-            self.uCurrent = np.concatenate([[0],res])  
+            
+       
+            b = np.delete(b,0)
+
+            res = linalg.solve(self.matrix,b )
+            self.uCurrent += np.concatenate([[0],res])  
             self.residual()
-            residual = np.linalg.norm(self.f)
+            residual = np.linalg.norm(self.f) 
             print("Iteration ",it," Residual: ",residual)
             it += 1
 
-
+        print(self.uCurrent[len(self.uCurrent)-1])
 
     def plot(self):
         plt.plot(self.nodes,self.uCurrent,color='#007FFF')
-        plt.xlabel("Positon")
+        plt.xlabel("Position")
         plt.ylabel("Displacement")
-        #plt.grid()
         plt.savefig("bond-based-1d.pdf")
 
 
-
-
 if __name__=="__main__": 
-    c = Compute()
-    c.solve(10,1e-6)
-    c.plot()
+
+    #for i in range(2,13):
+    #    n = np.power(2,i)
+    #    print(n)
+    #    c = Compute(1/n)
+    #    c.solve(1000000,1e-5)
+    #    c.plot()
+
+    c = Compute(1/2)
+    c.solve(1000000,1e-11)
+    #c.plot()
