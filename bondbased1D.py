@@ -21,7 +21,6 @@ class Compute:
     uCurrent = []
     b = []
     f = []
-    pertubation = []
 
     # Config
     #h = 1
