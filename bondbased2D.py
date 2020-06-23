@@ -24,7 +24,7 @@ class Compute:
     def __init__(self,h):
         # Generate the mesh
         self.h = h
-        self.delta = 3*h
+        self.delta = 4*h
         n = int(16/self.h) + 1
         self.fix = []
         self.load = []
@@ -116,7 +116,7 @@ class Compute:
         self.matrix = np.zeros((2*len(self.nodes),2*len(self.nodes)))
         for i in range(0,len(self.nodes)):
             for j in self.neighbors[i]:
-                tmp = abs(self.A(i,j))
+                tmp = self.A(i,j)
                 #Set the matrix entries for the neighbors
                 self.matrix[i*2][j*2] =  tmp[0,0]
                 self.matrix[i*2][j*2+1] =  tmp[0,1]
@@ -127,6 +127,10 @@ class Compute:
                 self.matrix[i*2][i*2+1] +=  tmp[0,1]
                 self.matrix[i*2+1][i*2] +=  tmp[1,0]
                 self.matrix[i*2+1][i*2+1] +=  tmp[1,1]
+
+        #plt.matshow(self.matrix)
+        #plt.colorbar()
+        #plt.show()
 
 
     def E(self,i,j):
@@ -156,22 +160,22 @@ class Compute:
                 self.matrix = np.delete(self.matrix,i,1)
     
             
-            length=2*len(self.nodes)-1
-            ixgrid = np.ix_([length, length-1], np.linspace(0,length,length+1,dtype=int))
+            #length=2*len(self.nodes)-1
+            #ixgrid = np.ix_([length, length-1], np.linspace(0,length,length+1,dtype=int))
             #print(self.nodes[len(self.nodes)-1])
             #print(self.matrix[ixgrid].tolist())
-            print(np.sum(np.absolute(self.matrix[ixgrid])))
+            #print(np.sum(np.absolute(self.matrix[ixgrid])))
             #print(np.nonzero(self.matrix[ixgrid][0]))
             #print(np.nonzero(self.matrix[ixgrid][1]))
             #print(len(self.neighbors[len(self.nodes)-1]))
             #print(self.b[2*len(self.nodes)-2])
 
 
-            length=2*len(self.nodes)-17
-            ixgrid = np.ix_([length, length-1], np.linspace(0,length,length+1,dtype=int))
+            #length=2*len(self.nodes)-17
+            #ixgrid = np.ix_([length, length-1], np.linspace(0,length,length+1,dtype=int))
             #print(self.matrix[ixgrid].tolist())
             #print(self.nodes[len(self.nodes)-17])
-            print(np.sum(np.absolute(self.matrix[ixgrid])))
+            #print(np.sum(np.absolute(self.matrix[ixgrid])))
             #print(np.nonzero(self.matrix[ixgrid][0]))
             #print(np.nonzero(self.matrix[ixgrid][1]))
             #print(len(self.neighbors[len(self.nodes)-17]))
@@ -196,6 +200,8 @@ class Compute:
         
             #plt.scatter(self.nodes[:,0],self.nodes[:,1],c=res[0:len(self.f)-1:2])
             #plt.colorbar()
+            #ax = plt.gca()
+            #ax.set_facecolor('gray')
             #plt.show()
 
             self.residual()
@@ -209,12 +215,16 @@ class Compute:
         # Plot u_x
         plt.scatter(self.nodes[:,0],self.nodes[:,1],c=self.uCurrent[:,0])
         plt.colorbar()
+        ax = plt.gca()
+        ax.set_facecolor('gray')
         plt.xlabel("Position")
         plt.ylabel("Displacement $u_x$")
         plt.savefig("bond-based-2d-u-x.pdf")
         # Plot u_y
         plt.scatter(self.nodes[:,0],self.nodes[:,1],c=self.uCurrent[:,1])
         plt.colorbar()
+        ax = plt.gca()
+        ax.set_facecolor('gray')
         plt.xlabel("Position")
         plt.ylabel("Displacement $u_y$")
         plt.savefig("bond-based-2d-u-y.pdf")
