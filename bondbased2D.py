@@ -233,5 +233,5 @@ class Compute:
 if __name__=="__main__": 
 
     c = Compute(1)
-    c.solve(1000000,1e-11)
+    c.solve(1000000,100)
     #c.plot()
