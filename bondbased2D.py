@@ -18,8 +18,13 @@ class Compute:
     neighbors = []
 
     # Config
-    C = 4000
-    beta = 100
+    E=4000
+    G=E/(2*(1+1/3))
+    #beta=(16/6)*1e3/E
+    beta=1
+    C=30000.0
+    #C=20*G/beta
+    
 
     def __init__(self,h):
         # Generate the mesh
@@ -33,10 +38,10 @@ class Compute:
         for i in range(0,n):
             for j in range(0,n):
                 self.nodes.append([i*h,j*h])
-                if i*h < 3*h:
-                    self.fix.append(index) 
-                if i*h > 16-3*h:
+                if i*h < 1*h:
                     self.load.append(index)
+                if i*h > 16-1*h:
+                    self.fix.append(index) 
                 index+=1
         
         self.fix = np.sort(self.fix)
@@ -54,7 +59,7 @@ class Compute:
         self.b = np.zeros(2*len(self.nodes))
         for i in range(0,len(self.nodes)):
                 if i in self.load:
-                    self.b[2*i] = 40. / self.V[i]
+                    self.b[2*i] = -40. / self.V[i] / 17
 
         self.f = np.zeros(2*len(self.nodes))
      
@@ -83,6 +88,7 @@ class Compute:
                 self.f[2*i+1] += tmp[1]
             if i in self.fix:
                 self.f[2*i] = 0
+                self.f[2*i+1] = 0
 
 
 
@@ -118,10 +124,10 @@ class Compute:
             for j in self.neighbors[i]:
                 tmp = self.A(i,j)
                 #Set the matrix entries for the neighbors
-                self.matrix[i*2][j*2] =  tmp[0,0]
-                self.matrix[i*2][j*2+1] =  tmp[0,1]
-                self.matrix[i*2+1][j*2] =  tmp[1,0]
-                self.matrix[i*2+1][j*2+1] =  tmp[1,1]
+                self.matrix[i*2][j*2] +=  tmp[0,0]
+                self.matrix[i*2][j*2+1] +=  tmp[0,1]
+                self.matrix[i*2+1][j*2] +=  tmp[1,0]
+                self.matrix[i*2+1][j*2+1] +=  tmp[1,1]
                 #set the matrix etnry for the node itself
                 self.matrix[i*2][i*2] +=  tmp[0,0]
                 self.matrix[i*2][i*2+1] +=  tmp[0,1]
@@ -209,29 +215,60 @@ class Compute:
             print("Iteration ",it," Residual: ",residual)
             it += 1
 
-        print(self.uCurrent[len(self.uCurrent)-1])
+    def ux(self,x):
+        F=-40
+        E=4000
+        W = L = 16
+        t = 1
+        return F/(E*W*t)*(x-L)
 
     def plot(self):
         # Plot u_x
-        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=self.uCurrent[:,0])
-        plt.colorbar()
+        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=abs(self.uCurrent[:,0]))
         ax = plt.gca()
-        ax.set_facecolor('gray')
-        plt.xlabel("Position")
-        plt.ylabel("Displacement $u_x$")
+        ax.set_facecolor('#F0F8FF')
+        v = np.linspace(min(abs(self.uCurrent[:,0])), max(abs(self.uCurrent[:,0])), 10, endpoint=True)
+        clb = plt.colorbar(ticks=v)
+        clb.ax.set_title('Displacement $u_x$')
+        plt.xlabel("Position $x$")
+        plt.ylabel("Position $y$")
         plt.savefig("bond-based-2d-u-x.pdf")
+        plt.clf()
         # Plot u_y
-        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=self.uCurrent[:,1])
-        plt.colorbar()
+        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=abs(self.uCurrent[:,1]))
         ax = plt.gca()
-        ax.set_facecolor('gray')
-        plt.xlabel("Position")
-        plt.ylabel("Displacement $u_y$")
+        ax.set_facecolor('#F0F8FF')
+        v = np.linspace(min(abs(self.uCurrent[:,1])), max(abs(self.uCurrent[:,1])), 10, endpoint=True)
+        clb = plt.colorbar(ticks=v)
+        clb.ax.set_title('Displacement $u_y$')
+        plt.xlabel("Position $x$")
+        plt.ylabel("Position $y$")
         plt.savefig("bond-based-2d-u-y.pdf")
-
+        plt.clf()
+        # Error plots
+        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=abs(self.uCurrent[:,0]-self.ux(self.nodes[:,0])))
+        ax = plt.gca()
+        ax.set_facecolor('#F0F8FF')
+        v = np.linspace(min(abs(self.uCurrent[:,0]-self.ux(self.nodes[:,0]))), max(abs(self.uCurrent[:,0]-self.ux(self.nodes[:,0]))), 10, endpoint=True)
+        clb = plt.colorbar(thicks=v)
+        clb.ax.set_title('Error $u_x$')
+        plt.xlabel("Position $x$")
+        plt.ylabel("Position $y$")
+        plt.savefig("bond-based-2d-e-x.pdf")
+        plt.clf()
+        # Plot e_y
+        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=abs(self.uCurrent[:,1]-self.ux(self.nodes[:,1])))
+        ax = plt.gca()
+        ax.set_facecolor('#F0F8FF')
+        v = np.linspace(min(abs(self.uCurrent[:,1]-self.ux(self.nodes[:,1]))), max(abs(self.uCurrent[:,1]-self.ux(self.nodes[:,1]))), 10, endpoint=True)
+        clb = plt.colorbar(thicks=v)
+        clb.ax.set_title('Error $u_y$')
+        plt.xlabel("Position $x$")
+        plt.ylabel("Position $y$")
+        plt.savefig("bond-based-2d-e-y.pdf")
 
 if __name__=="__main__": 
 
     c = Compute(1)
-    c.solve(1000000,100)
-    #c.plot()
+    c.solve(1000000,1e-4)
+    c.plot()

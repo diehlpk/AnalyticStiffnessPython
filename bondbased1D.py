@@ -23,13 +23,9 @@ class Compute:
     f = []
 
     # Config
-    #h = 1
-    #delta = 3*h
     C = 4000
     beta = 1
-    #VB = h
-    #V = h
-    #eps = 1e-4
+
 
     def __init__(self,h):
         # Generate the mesh
@@ -148,6 +144,6 @@ class Compute:
 
 if __name__=="__main__": 
 
-    c = Compute(1/2)
+    c = Compute(1/4)
     c.solve(1000000,1e-11)
     #c.plot()
