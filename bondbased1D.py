@@ -51,7 +51,11 @@ class Compute:
         #self.b[len(self.nodes)-3] = 40. / self.V[len(self.nodes)-3]  
         self.f = np.zeros(len(self.nodes))
 
+
+
     def searchNeighbors(self):
+        """ Search all neighbors for each node"""
+
         for i in range(0,len(self.nodes)):
             self.neighbors.append([])
             for j in range(0,len(self.nodes)):
@@ -59,12 +63,21 @@ class Compute:
                     self.neighbors[i].append(j)
 
     def L(self,i,j):
+        """ Compute the peridynamic force 
+
+        Keyword arguments
+        i = Index of node i
+        j = Index of node j
+        """
+
         nodes = self.nodes
         r = np.sqrt(self.length(i,j)) * self.S(i,j)
         return (2./self.VB) * self.w(self.length(nodes[i],nodes[j]))/self.delta  * self.f1(r) / self.length(nodes[i],nodes[j])  *  self.e(i,j) * self.V[j]
 
 
     def residual(self):
+        """ Compute the residual vector """
+
         for i in range(0,len(self.nodes)):
             self.f[i] = self.b[i]
             for j in self.neighbors[i]:
@@ -72,31 +85,62 @@ class Compute:
         self.f[0] = 0
 
     def length(self,x,y): 
+        """ Computes the distance between the node x and node y 
+
+        Keyword arguments:
+        x = node x
+        y = node y
+        """
+
         return np.sqrt((y-x) * (y-x)) 
 
     def S(self,i,j):
+        """ Compute the strech between the nodes with the idnex i and index j
+
+        Keyword arguments
+        i = Index of node i
+        j = Index of node j
+        """
+
         nodes = self.nodes
         return  np.dot((self.uCurrent[j] - self.uCurrent[i]) / self.length(nodes[i],nodes[j]),self.e(i,j))
 
     def w(self,r):
+        """ Influence function """
+
         return 1
 
     def e(self,i,j):
+        """ Computes the normilazed distance between nodes with the index i and j in the intitial configuraiton """
+
         return (self.nodes[j]-self.nodes[i]) / self.length(self.nodes[i],self.nodes[j])
 
     def f1(self,r):
+        """ Computes the potential for the peridyanmic force """
+
         return 2*r*self.C*self.beta* np.exp(-self.beta * r * r )
 
     def f2(self,r):
+        """ Computes the potential for the approximation of the peridyanmic force """
+
         return 2*self.C*self.beta*np.exp(-r*r*self.beta)-4*self.C*r*r*self.beta*self.beta*np.exp(-r*r*self.beta)
 
     def A(self,i,j):
+        """ Compute the tensor for the stifffness matrix for the nodes with the index i and index j
+
+        Keyword arguments
+        i = Index of node i
+        j = Index of node j
+        """
+
         nodes = self.nodes
         r = np.sqrt(self.length(i,j)) * self.S(i,j)
         return  (2./self.VB) * self.w(self.length(nodes[i],nodes[j]))/self.delta  * self.f2(r)  * ( 1. / self.length(nodes[i],nodes[j]))  * self.E(i,j) 
 
 
     def assemblymatrix(self):
+        """ Assembles the stiffness matrix """
+
         self.matrix = np.zeros((len(self.nodes),len(self.nodes)))
         for i in range(0,len(self.nodes)):
             for j in self.neighbors[i]:
@@ -105,10 +149,13 @@ class Compute:
 
 
     def E(self,i,j):
+        """ Computes the distance tensor with respect to the intitial configuraiton """
+
         return np.dot(self.e(i,j),self.e(j,i))
 
     def solve(self,maxIt,epsilion):
-
+        """ Runs the Newton step to determine the displacement solution """
+        
         self.residual()
         print("Residual with intial guess",np.linalg.norm(self.f))
         it = 1

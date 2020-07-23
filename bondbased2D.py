@@ -5,9 +5,11 @@ import numpy as np
 from scipy import linalg
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import random
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
+rc('font', size=14)
 
 np.set_printoptions(precision=4)
 #mpl.style.use('seaborn')
@@ -29,7 +31,7 @@ class Compute:
     def __init__(self,h):
         # Generate the mesh
         self.h = h
-        self.delta = 4*h
+        self.delta = 5*h
         n = int(16/self.h) + 1
         self.fix = []
         self.load = []
@@ -89,9 +91,6 @@ class Compute:
             if i in self.fix:
                 self.f[2*i] = 0
                 self.f[2*i+1] = 0
-
-
-
 
     def length(self,i,j): 
         return np.sqrt((self.nodes[j][0]-self.nodes[i][0]) * (self.nodes[j][0]-self.nodes[i][0]) + (self.nodes[j][1]-self.nodes[i][1]) * (self.nodes[j][1]-self.nodes[i][1]) ) 
@@ -198,7 +197,7 @@ class Compute:
     
             unew = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
             for i in range(0,len(self.uCurrent)):
-                if not i in self.fix:
+                if not i in self.fix: 
                     unew[i] = [res[2*i],res[2*i+1]]
                     
             self.uCurrent += unew
@@ -229,46 +228,48 @@ class Compute:
         ax.set_facecolor('#F0F8FF')
         v = np.linspace(min(abs(self.uCurrent[:,0])), max(abs(self.uCurrent[:,0])), 10, endpoint=True)
         clb = plt.colorbar(ticks=v)
-        clb.ax.set_title('Displacement $u_x$')
+        clb.set_label(r'Displacement $ u_x $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-u-x.pdf")
+        plt.savefig("bond-based-2d-u-x.pdf",bbox_inches='tight')
         plt.clf()
         # Plot u_y
-        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=abs(self.uCurrent[:,1]))
+        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=self.uCurrent[:,1])
         ax = plt.gca()
         ax.set_facecolor('#F0F8FF')
-        v = np.linspace(min(abs(self.uCurrent[:,1])), max(abs(self.uCurrent[:,1])), 10, endpoint=True)
+        v = np.linspace(min(self.uCurrent[:,1]), max(self.uCurrent[:,1]), 10, endpoint=True)
         clb = plt.colorbar(ticks=v)
-        clb.ax.set_title('Displacement $u_y$')
+        clb.set_label(r'Displacement $ u_y $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-u-y.pdf")
+        plt.savefig("bond-based-2d-u-y.pdf",bbox_inches='tight')
         plt.clf()
         # Error plots
-        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=abs(self.uCurrent[:,0]-self.ux(self.nodes[:,0])))
+        eux = abs(abs(self.uCurrent[:,0])-abs(self.ux(self.nodes[:,0])))
+        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=eux)
         ax = plt.gca()
         ax.set_facecolor('#F0F8FF')
-        v = np.linspace(min(abs(self.uCurrent[:,0]-self.ux(self.nodes[:,0]))), max(abs(self.uCurrent[:,0]-self.ux(self.nodes[:,0]))), 10, endpoint=True)
-        clb = plt.colorbar(thicks=v)
-        clb.ax.set_title('Error $u_x$')
+        v = np.linspace(min(eux), max(eux), 10, endpoint=True)
+        clb = plt.colorbar(ticks=v)
+        clb.set_label(r'Error $ u_x $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-e-x.pdf")
+        plt.savefig("bond-based-2d-e-x.pdf",bbox_inches='tight')
         plt.clf()
         # Plot e_y
-        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=abs(self.uCurrent[:,1]-self.ux(self.nodes[:,1])))
+        euy = abs(abs(self.uCurrent[:,1])-abs(self.ux(self.nodes[:,1])))
+        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=euy)
         ax = plt.gca()
         ax.set_facecolor('#F0F8FF')
-        v = np.linspace(min(abs(self.uCurrent[:,1]-self.ux(self.nodes[:,1]))), max(abs(self.uCurrent[:,1]-self.ux(self.nodes[:,1]))), 10, endpoint=True)
-        clb = plt.colorbar(thicks=v)
-        clb.ax.set_title('Error $u_y$')
+        v = np.linspace(min(euy), max(euy), 10, endpoint=True)
+        clb = plt.colorbar(ticks=v)
+        clb.set_label(r'Error $ u_y $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-e-y.pdf")
+        plt.savefig("bond-based-2d-e-y.pdf",bbox_inches='tight')
 
 if __name__=="__main__": 
 
     c = Compute(1)
-    c.solve(1000000,1e-4)
+    c.solve(1000000,1e-3)
     c.plot()
