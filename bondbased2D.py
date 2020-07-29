@@ -31,8 +31,8 @@ class Compute:
     def __init__(self,h):
         # Generate the mesh
         self.h = h
-        self.delta = 5*h
-        n = int(16/self.h) + 1
+        self.delta = 4*h
+        n = int(1.6/self.h) + 1
         self.fix = []
         self.load = []
         #Generate grid
@@ -42,7 +42,7 @@ class Compute:
                 self.nodes.append([i*h,j*h])
                 if i*h < 1*h:
                     self.load.append(index)
-                if i*h > 16-1*h:
+                if i*h > 1.6-1*h:
                     self.fix.append(index) 
                 index+=1
         
@@ -88,6 +88,7 @@ class Compute:
                 tmp =  self.L(i,j)
                 self.f[2*i] += tmp[0]
                 self.f[2*i+1] += tmp[1]
+        
             if i in self.fix:
                 self.f[2*i] = 0
                 self.f[2*i+1] = 0
@@ -123,10 +124,10 @@ class Compute:
             for j in self.neighbors[i]:
                 tmp = self.A(i,j)
                 #Set the matrix entries for the neighbors
-                self.matrix[i*2][j*2] +=  tmp[0,0]
-                self.matrix[i*2][j*2+1] +=  tmp[0,1]
-                self.matrix[i*2+1][j*2] +=  tmp[1,0]
-                self.matrix[i*2+1][j*2+1] +=  tmp[1,1]
+                self.matrix[i*2][j*2] =  tmp[0,0]
+                self.matrix[i*2][j*2+1] =  tmp[0,1]
+                self.matrix[i*2+1][j*2] =  tmp[1,0]
+                self.matrix[i*2+1][j*2+1] =  tmp[1,1]
                 #set the matrix etnry for the node itself
                 self.matrix[i*2][i*2] +=  tmp[0,0]
                 self.matrix[i*2][i*2+1] +=  tmp[0,1]
@@ -140,10 +141,8 @@ class Compute:
 
     def E(self,i,j):
         xi = self.e(i,j)
-        return np.array([[xi[0]*xi[0], xi[0]*xi[1]],[xi[0]*xi[1],xi[1]*xi[1]]])
-        
-        
-        #return np.tensordot(self.e(i,j),self.e(j,i),axes=0)
+        #return np.array([[xi[0]*xi[0], xi[0]*xi[1]],[xi[0]*xi[1],xi[1]*xi[1]]])
+        return np.tensordot(self.e(i,j),self.e(j,i),axes=0)
 
     def solve(self,maxIt,epsilion):
 
@@ -160,7 +159,7 @@ class Compute:
 
             for i in range(len(self.fix)-1,0):
                 
-                b= np.delta(b,i)
+                b= np.delete(b,i)
                 self.matrix = np.delete(self.matrix,i,0)
                 self.matrix = np.delete(self.matrix,i,1)
     
@@ -193,7 +192,7 @@ class Compute:
 
 
 
-            res = linalg.solve(self.matrix,b)
+            res = linalg.solve(self.matrix,-b)
     
             unew = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
             for i in range(0,len(self.uCurrent)):
@@ -220,6 +219,14 @@ class Compute:
         W = L = 16
         t = 1
         return F/(E*W*t)*(x-L)
+
+    def uy(self,y):
+        F=-40
+        E=4000
+        W = L = 16
+        t = 1
+        nu = 1/3
+        return -(y/W-0.5) / E / t * nu * F
 
     def plot(self):
         # Plot u_x
@@ -257,7 +264,7 @@ class Compute:
         plt.savefig("bond-based-2d-e-x.pdf",bbox_inches='tight')
         plt.clf()
         # Plot e_y
-        euy = abs(abs(self.uCurrent[:,1])-abs(self.ux(self.nodes[:,1])))
+        euy = abs(abs(self.uCurrent[:,1])-abs(self.uy(self.nodes[:,1])))
         plt.scatter(self.nodes[:,0],self.nodes[:,1],c=euy)
         ax = plt.gca()
         ax.set_facecolor('#F0F8FF')
@@ -270,6 +277,6 @@ class Compute:
 
 if __name__=="__main__": 
 
-    c = Compute(1)
+    c = Compute(0.1)
     c.solve(1000000,1e-3)
     c.plot()
