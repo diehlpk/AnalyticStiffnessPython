@@ -180,14 +180,11 @@ class Compute:
             print("Iteration ",it," Residual: ",residual)
             it += 1
 
-        print(self.uCurrent[len(self.uCurrent)-1])
-
     def plot(self):
         plt.plot(self.nodes,self.uCurrent,color='#007FFF')
         plt.xlabel("Position")
         plt.ylabel("Displacement")
         plt.savefig("bond-based-1d.pdf")
-
 
 if __name__=="__main__": 
 
