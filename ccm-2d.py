@@ -11,7 +11,7 @@ rc('text', usetex=True)
 rc('font', size=14)
 
 
-F=-40
+F=-4
 E=4000
 W=1.6
 L=1.6

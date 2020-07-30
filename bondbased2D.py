@@ -47,6 +47,7 @@ class Compute:
                 index+=1
         
         self.fix = np.sort(self.fix)
+
         self.nodes = np.array(self.nodes)
 
         self.V = np.empty(n*n)
@@ -61,7 +62,7 @@ class Compute:
         self.b = np.zeros(2*len(self.nodes))
         for i in range(0,len(self.nodes)):
                 if i in self.load:
-                    self.b[2*i] = -40. / self.V[i] / 17
+                    self.b[2*i] = -4. / self.V[i] / 17 
 
         self.f = np.zeros(2*len(self.nodes))
      
@@ -157,11 +158,16 @@ class Compute:
 
             b = np.copy(self.f)
 
-            for i in range(len(self.fix)-1,0):
+            #print(self.fix)
+            
+            for i in range(0,len(self.fix)):
+
+
+                index = self.fix[len(self.fix)-1-i]
                 
-                b= np.delete(b,i)
-                self.matrix = np.delete(self.matrix,i,0)
-                self.matrix = np.delete(self.matrix,i,1)
+                b= np.delete(b,index)
+                self.matrix = np.delete(self.matrix,index,0)
+                self.matrix = np.delete(self.matrix,index,1)
     
             
             #length=2*len(self.nodes)-1
@@ -278,5 +284,5 @@ class Compute:
 if __name__=="__main__": 
 
     c = Compute(0.1)
-    c.solve(1000000,1e-3)
+    c.solve(1000000,30)
     c.plot()
