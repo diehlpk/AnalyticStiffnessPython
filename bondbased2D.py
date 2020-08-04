@@ -31,7 +31,7 @@ class Compute:
     def __init__(self,h):
         # Generate the mesh
         self.h = h
-        self.delta = 4*h
+        self.delta = 5*h
         n = int(1.6/self.h) + 1
         self.fix = []
         self.load = []
@@ -42,9 +42,12 @@ class Compute:
                 self.nodes.append([i*h,j*h])
                 if i*h < 1*h:
                     self.load.append(index)
+                    #plt.scatter(i*h,j*h)
                 if i*h > 1.6-1*h:
-                    self.fix.append(index) 
+                    self.fix.append(index)
+                    #plt.scatter(i*h,j*h)
                 index+=1
+        #plt.show()
         
         self.fix = np.sort(self.fix)
 
@@ -62,7 +65,7 @@ class Compute:
         self.b = np.zeros(2*len(self.nodes))
         for i in range(0,len(self.nodes)):
                 if i in self.load:
-                    self.b[2*i] = -4. / self.V[i] / 17 
+                    self.b[2*i] = -0.004 / self.V[i] / 17
 
         self.f = np.zeros(2*len(self.nodes))
      
@@ -91,7 +94,7 @@ class Compute:
         
             if i in self.fix:
                 self.f[2*i] = 0
-                #self.f[2*i+1] = 0
+                self.f[2*i+1] = 0
 
     def length(self,i,j): 
         return np.sqrt((self.nodes[j][0]-self.nodes[i][0]) * (self.nodes[j][0]-self.nodes[i][0]) + (self.nodes[j][1]-self.nodes[i][1]) * (self.nodes[j][1]-self.nodes[i][1]) ) 
@@ -119,23 +122,24 @@ class Compute:
     def assemblymatrix(self):
         self.matrix = np.zeros((2*len(self.nodes),2*len(self.nodes)))
         for i in range(0,len(self.nodes)):
-            for j in self.neighbors[i]:
-                tmp = self.A(i,j)
-                #Set the matrix entries for the neighbors
-                self.matrix[i*2][j*2] =  tmp[0,0]
-                self.matrix[i*2][j*2+1] =  tmp[0,1]
-                self.matrix[i*2+1][j*2] =  tmp[1,0]
-                self.matrix[i*2+1][j*2+1] =  tmp[1,1]
-                #set the matrix entries for the node it self
-                self.matrix[i*2][i*2] +=  tmp[0,0]
-                self.matrix[i*2][i*2+1] +=  tmp[0,1]
-                self.matrix[i*2+1][i*2] +=  tmp[1,0]
-                self.matrix[i*2+1][i*2+1] +=  tmp[1,1]
+            if not i in self.fix:
+                for j in self.neighbors[i]:
+                    tmp = self.A(i,j)
+                    #Set the matrix entries for the neighbors
+                    self.matrix[i*2][j*2] +=  tmp[0,0]
+                    self.matrix[i*2][j*2+1] +=  tmp[0,1]
+                    self.matrix[i*2+1][j*2] +=  tmp[1,0]
+                    self.matrix[i*2+1][j*2+1] +=  tmp[1,1]
+                    #set the matrix entries for the node it self
+                    self.matrix[i*2][i*2] -=  tmp[0,0]
+                    self.matrix[i*2][i*2+1] -=  tmp[0,1]
+                    self.matrix[i*2+1][i*2] -=  tmp[1,0]
+                    self.matrix[i*2+1][i*2+1] -=  tmp[1,1]
 
     def E(self,i,j):
         #xi = self.e(i,j)
         #xj = self.e(j,i)
-        #return np.array([[xi[0]*xj[0], xi[0]*xi[1]],[xi[0]*xi[1],xi[1]*xj[1]]])
+        #return np.array([[xi[0]*xi[0], xi[0]*xi[1]],[xi[0]*xi[1],xi[1]*xi[1]]])
         return np.tensordot(self.e(i,j),self.e(j,i),axes=0)
 
     def solve(self,maxIt,epsilion):
@@ -162,12 +166,14 @@ class Compute:
                 self.matrix = np.delete(self.matrix,index,1)
 
             
-            res = linalg.solve(self.matrix,-b)
+            res = linalg.solve(self.matrix,b)
     
             unew = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
+            j = 0
             for i in range(0,len(self.uCurrent)):
                 if not i in self.fix: 
-                    unew[i] = [res[2*i],res[2*i+1]]
+                    unew[i] = [res[2*j],res[2*j+1]]
+                    j += 1
                     
             self.uCurrent += unew
 
@@ -177,16 +183,16 @@ class Compute:
             it += 1
 
     def ux(self,x):
-        F=-4
+        F=-0.004
         E=4000
-        W = L = 16
+        W = L = 1.6
         t = 1
         return F/(E*W*t)*(x-L)
 
     def uy(self,y):
-        F=-4
+        F=-0.004
         E=4000
-        W = L = 16
+        W = L = 1.6
         t = 1
         nu = 1/3
         return -(y/W-0.5) / E / t * nu * F
