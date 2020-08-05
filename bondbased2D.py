@@ -43,7 +43,7 @@ class Compute:
                 if i*h < 1*h:
                     self.load.append(index)
                     #plt.scatter(i*h,j*h)
-                if i*h > 1.6-1*h:
+                if i*h >= 1.6-5*h:
                     self.fix.append(index)
                     #plt.scatter(i*h,j*h)
                 index+=1
@@ -65,7 +65,7 @@ class Compute:
         self.b = np.zeros(2*len(self.nodes))
         for i in range(0,len(self.nodes)):
                 if i in self.load:
-                    self.b[2*i] = -0.004 / self.V[i] / 17
+                    self.b[2*i] = -0.004 / self.V[i] 
 
         self.f = np.zeros(2*len(self.nodes))
      
@@ -246,6 +246,6 @@ class Compute:
 
 if __name__=="__main__": 
 
-    c = Compute(0.1)
-    c.solve(1000000,1e-3)
+    c = Compute(0.1/2)
+    c.solve(1000000,1e-6)
     c.plot()
