@@ -264,7 +264,7 @@ class Compute:
         clb.set_label(r'Displacement $ u_y $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-u-y.pdf",bbox_inches='tight')
+        plt.savefig("bond-based-2d-u-y-"+str(self.h)+"-"+str(self.delta_factor)+".pdf",bbox_inches='tight')
         plt.clf()
         # Error plots
         eux = abs(abs(self.uCurrent[:,0])-abs(self.ux(self.nodes[:,0])))
@@ -276,7 +276,7 @@ class Compute:
         clb.set_label(r'Error $ u_x $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-e-x.pdf",bbox_inches='tight')
+        plt.savefig("bond-based-2d-e-x-"+str(self.h)+"-"+str(self.delta_factor)+".pdf",bbox_inches='tight')
         plt.clf()
         # Plot e_y
         euy = abs(abs(self.uCurrent[:,1])-abs(self.uy(self.nodes[:,1])))
@@ -288,11 +288,11 @@ class Compute:
         clb.set_label(r'Error $ u_y $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-e-y.pdf",bbox_inches='tight')
+        plt.savefig("bond-based-2d-e-y-"+str(self.h)+"-"+str(self.delta_factor)+".pdf",bbox_inches='tight')
         plt.clf()
         # Force plots
-        tmp = self.f.reshape((len(self.nodes),2))
-        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=tmp[:,0])
+        tmp = self.f.reshape((len(self.nodes),2)) 
+        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=tmp[:,0]* self.V)
         ax = plt.gca()
         ax.set_facecolor('#F0F8FF')
         v = np.linspace(min(tmp[:,0]), max(tmp[:,0]), 10, endpoint=True)
@@ -300,10 +300,10 @@ class Compute:
         clb.set_label(r'$ f_x $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-f-x.pdf",bbox_inches='tight')
+        plt.savefig("bond-based-2d-f-x-"+str(self.h)+"-"+str(self.delta_factor)+".pdf",bbox_inches='tight')
         plt.clf()
         # Plot f_y
-        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=tmp[:,1])
+        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=tmp[:,1]* self.V)
         ax = plt.gca()
         ax.set_facecolor('#F0F8FF')
         v = np.linspace(min(tmp[:,1]), max(tmp[:,1]), 10, endpoint=True)
@@ -311,7 +311,7 @@ class Compute:
         clb.set_label(r'$ f_y $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-f-y.pdf",bbox_inches='tight')
+        plt.savefig("bond-based-2d-f-y-"+str(self.h)+"-"+str(self.delta_factor)+".pdf",bbox_inches='tight')
         plt.clf()
 
 if __name__=="__main__": 
