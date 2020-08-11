@@ -11,10 +11,10 @@ rc('text', usetex=True)
 rc('font', size=14)
 
 
-F=-0.004
+F=-0.4
 E=4000
-W=1.6
-L=1.6
+W=16
+L=16
 t=1
 nu = 1/3
 
@@ -26,8 +26,8 @@ def uy(y):
 
 
 
-h=0.1/2
-n = int(1.6/h) + 1
+h=1
+n = int(16/h) + 1
 
 nodes = []
 
