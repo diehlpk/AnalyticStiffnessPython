@@ -109,7 +109,7 @@ class Compute:
         self.b = np.zeros(2*len(self.nodes))
         for i in range(0,len(self.nodes)):
                 if i in self.load:
-                    self.b[2*i] = -0.4 / self.V[i]
+                    self.b[2*i] = -0.4 
 
         self.f = np.zeros(2*len(self.nodes))
 
@@ -135,8 +135,8 @@ class Compute:
         for i in range(0,len(self.nodes)):
             for j in self.neighbors[i]:
                 tmp =  self.L(i,j)
-                self.f[2*i] += tmp[0]
-                self.f[2*i+1] += tmp[1]
+                self.f[2*i] += tmp[0] * self.V[i]
+                self.f[2*i+1] += tmp[1] * self.V[i]
         
             if i in self.fix:
                 self.f[2*i] = 0
@@ -292,7 +292,7 @@ class Compute:
         plt.clf()
         # Force plots
         tmp = self.f.reshape((len(self.nodes),2)) 
-        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=tmp[:,0]* self.V)
+        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=tmp[:,0])
         ax = plt.gca()
         ax.set_facecolor('#F0F8FF')
         v = np.linspace(min(tmp[:,0]), max(tmp[:,0]), 10, endpoint=True)
@@ -303,7 +303,7 @@ class Compute:
         plt.savefig("bond-based-2d-f-x-"+str(self.h)+"-"+str(self.delta_factor)+".pdf",bbox_inches='tight')
         plt.clf()
         # Plot f_y
-        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=tmp[:,1]* self.V)
+        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=tmp[:,1])
         ax = plt.gca()
         ax.set_facecolor('#F0F8FF')
         v = np.linspace(min(tmp[:,1]), max(tmp[:,1]), 10, endpoint=True)
