@@ -22,12 +22,9 @@ class Compute:
     # Config
     E=4000
     G=E/(2*(1+1/3))
-    #beta=(16/6)*1e3/E
     beta=1
     C=30000.0
-    #C=20*G/beta
-    
-
+ 
     def __init__(self,h,delta_factor):
         # Generate the mesh
         self.h = h
@@ -43,61 +40,16 @@ class Compute:
                 self.nodes.append([i*h,j*h])
                 if i*h < self.delta_factor*h:
                     self.load.append(index)
-                    #plt.scatter(i*h,j*h,c="blue")
                 if i*h > 1.6-1*h:
                     self.fix.append(index)
-                    #plt.scatter(i*h,j*h,c="red")
                 index+=1
-        #plt.show()
-        
+
         self.fix = np.sort(self.fix)
 
         self.nodes = np.array(self.nodes)
 
         self.V = np.empty(n*n)
-        #self.V.fill(h*h)
-        #self.V[0] *= 0.5
-        #self.V[1] *= 0.5
-        #self.V[2] *= 0.5
-        #self.V[3] *= 0.5
-        #self.V[4] *= 0.5
-        #self.V[5] *= 0.5
-        #self.V[6] *= 0.5
-        #self.V[7] *= 0.5
-        #self.V[8] *= 0.5
-        #self.V[9] *= 0.5
-        #self.V[10] *= 0.5
-        #self.V[11] *= 0.5
-        #self.V[12] *= 0.5
-        #self.V[13] *= 0.5
-        #self.V[14] *= 0.5
-        #self.V[15] *= 0.5
-        #self.V[16] *= 0.5
-
-        #last = len(self.V) -1
-        #self.V[last] *= 0.5
-        #self.V[last-1] *= 0.5
-        #self.V[last-2] *= 0.5
-        #self.V[last-3] *= 0.5
-        #self.V[last-4] *= 0.5
-        #self.V[last-5] *= 0.5
-        #self.V[last-6] *= 0.5
-        #self.V[last-7] *= 0.5
-        #self.V[last-8] *= 0.5
-        #self.V[last-9] *= 0.5
-        #self.V[last-10] *= 0.5
-        #self.V[last-11] *= 0.5
-        #self.V[last-12] *= 0.5
-        #self.V[last-13] *= 0.5
-        #self.V[last-14] *= 0.5
-        #self.V[last-15] *= 0.5
-        #self.V[last-16] *= 0.5
-
         self.V.fill(h*h)
-
-        #for i in range(0,len(self.nodes)):
-        #    plt.scatter(self.nodes[:,0],self.nodes[:,1],c=self.V)
-        #plt.show()
 
         self.VB = np.pi * self.delta * self.delta
         # Search neighbors
@@ -317,5 +269,5 @@ class Compute:
 if __name__=="__main__": 
 
     c = Compute(float(sys.argv[1]),int(sys.argv[2]))
-    c.solve(1000000,1e-3)
+    c.solve(1000000,470)
     c.plot()
