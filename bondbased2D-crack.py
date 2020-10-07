@@ -28,7 +28,7 @@ class Compute:
     C=300000000
     rbar=np.sqrt(0.5/beta)
  
-    def __init__(self,h,delta_factor,iter=1):
+    def __init__(self,h,delta_factor,iter):
         # Generate the mesh
         self.h = h
         self.delta_factor = delta_factor
@@ -82,8 +82,7 @@ class Compute:
             self.uCurrent = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
 
         else:
-
-            filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-displacement.npy", "rb")
+            filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(self.iter-1)+"-displacement.npy", "rb")
             self.uCurrent = np.load(filehandler)
 
 
@@ -217,7 +216,6 @@ class Compute:
             self.residual(iter)
             print("Residual with intial guess",np.linalg.norm(self.f))
 
-            it = 1
             residual = np.finfo(np.float).max
 
             while(residual > epsilion):
@@ -296,18 +294,18 @@ class Compute:
         plt.clf()
 
     def dump(self,iter):
-        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-displacement.npy", "wb")
+        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-displacement.npy", "wb")
         np.save(filehandler, self.uCurrent)
-        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-damage.npy", "wb")
+        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-damage.npy", "wb")
         np.save(filehandler,self.damage)
-        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-b.npy", "wb")
+        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-b.npy", "wb")
         np.save(filehandler,self.b)
-        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-f.npy", "wb")
+        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-f.npy", "wb")
         np.save(filehandler,self.f)
 
 
 if __name__=="__main__": 
 
-    c = Compute(float(sys.argv[1]),int(sys.argv[2]),1)
-    c.solve(1,194419.14165495549)
+    c = Compute(float(sys.argv[1]),int(sys.argv[2]),int(sys.argv[3]))
+    c.solve(40,1e-6)
     #c.plot()
