@@ -7,6 +7,7 @@ from shapely.geometry import LineString
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import sys
+import pickle 
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
@@ -23,8 +24,8 @@ class Compute:
     # Config
     E=4000
     G=E/(2*(1+1/3))
-    beta=1
-    C=30000.0
+    beta=0.1
+    C=300000000
     rbar=np.sqrt(0.5/beta)
  
     def __init__(self,h,delta_factor):
@@ -79,7 +80,7 @@ class Compute:
         self.b = np.zeros(2*len(self.nodes))
         for i in range(0,len(self.nodes)):
                 if i in self.load:
-                    self.b[2*i+1] = 400 / (50*19)
+                    self.b[2*i+1] = 2000000 / (50*19)
                     #print(i,2*i+1)
 
         self.f = np.zeros(2*len(self.nodes))
@@ -237,7 +238,7 @@ class Compute:
 
                 self.uCurrent += unew
 
-       
+
 
                 self.residual(iter)
                 residual = np.linalg.norm(self.f) 
@@ -245,6 +246,7 @@ class Compute:
                 it += 1
 
             self.plot(iter)
+            self.dump(iter)
 
     def plot(self,iter):
         # Plot u_x
@@ -281,9 +283,19 @@ class Compute:
         plt.savefig("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+".pdf",bbox_inches='tight')
         plt.clf()
 
+    def dump(self,iter):
+        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"displacement.obj", "wb")
+        np.save(filehandler, self.uCurrent)
+        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"damage.obj", "wb")
+        np.save(filehandler,self.damage)
+        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"b.obj", "wb")
+        np.save(filehandler,self.b)
+        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"f.obj", "wb")
+        np.save(filehandler,self.f)
+
 
 if __name__=="__main__": 
 
     c = Compute(float(sys.argv[1]),int(sys.argv[2]))
-    c.solve(10,1e-4)
+    c.solve(1,402639.0540672446)
     #c.plot()
