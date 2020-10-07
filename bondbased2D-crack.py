@@ -28,7 +28,7 @@ class Compute:
     C=300000000
     rbar=np.sqrt(0.5/beta)
  
-    def __init__(self,h,delta_factor):
+    def __init__(self,h,delta_factor,iter=1):
         # Generate the mesh
         self.h = h
         self.delta_factor = delta_factor
@@ -40,6 +40,8 @@ class Compute:
         self.fix = []
         self.load = []
         self.z = []
+        self.iter = iter
+
         #Generate grid
         index = 0
 
@@ -73,17 +75,27 @@ class Compute:
         self.VB = np.pi * self.delta * self.delta
         # Search neighbors
         self.searchNeighbors()
-        # Initialize 
-        self.uCurrent = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
-        
+
+        if self.iter == 1:
+
+            # Initialize 
+            self.uCurrent = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
+
+        else:
+
+            filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-displacement.npy", "rb")
+            self.uCurrent = np.load(filehandler)
+
+
         #Apply the load to the body force vector
         self.b = np.zeros(2*len(self.nodes))
         for i in range(0,len(self.nodes)):
-                if i in self.load:
-                    self.b[2*i+1] = 2000000 / (50*19)
+            if i in self.load:
+                self.b[2*i+1] = 4000000 / (50*19)
                     #print(i,2*i+1)
 
         self.f = np.zeros(2*len(self.nodes))
+
 
         print("Matrix size "+str(2*len(self.nodes))+"x"+str(2*len(self.nodes)))
      
@@ -199,7 +211,7 @@ class Compute:
 
     def solve(self,maxIt,epsilion):
 
-        for iter in range(1,maxIt+1):
+        for iter in range(self.iter,maxIt+1):
 
             print(" ##### Load step: " + str(iter) + " #####")
             self.residual(iter)
@@ -284,18 +296,18 @@ class Compute:
         plt.clf()
 
     def dump(self,iter):
-        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"displacement.obj", "wb")
+        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-displacement.npy", "wb")
         np.save(filehandler, self.uCurrent)
-        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"damage.obj", "wb")
+        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-damage.npy", "wb")
         np.save(filehandler,self.damage)
-        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"b.obj", "wb")
+        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-b.npy", "wb")
         np.save(filehandler,self.b)
-        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"f.obj", "wb")
+        filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-f.npy", "wb")
         np.save(filehandler,self.f)
 
 
 if __name__=="__main__": 
 
-    c = Compute(float(sys.argv[1]),int(sys.argv[2]))
-    c.solve(1,402639.0540672446)
+    c = Compute(float(sys.argv[1]),int(sys.argv[2]),1)
+    c.solve(1,194419.14165495549)
     #c.plot()
