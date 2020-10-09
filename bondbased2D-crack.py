@@ -82,7 +82,7 @@ class Compute:
             self.uCurrent = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
 
         else:
-            filehandler = open("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(self.iter-1)+"-displacement.npy", "rb")
+            filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(self.iter-1)+"-displacement.npy", "rb")
             self.uCurrent = np.load(filehandler)
 
 
@@ -210,6 +210,8 @@ class Compute:
 
     def solve(self,maxIt,epsilion):
 
+        
+
         for iter in range(self.iter,maxIt+1):
 
             print(" ##### Load step: " + str(iter) + " #####")
@@ -218,6 +220,7 @@ class Compute:
 
             residual = np.finfo(np.float).max
 
+            it = 1
             while(residual > epsilion):
 
                 self.assemblymatrix()  
