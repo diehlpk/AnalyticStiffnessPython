@@ -12,7 +12,8 @@ Examples: Title
 * ccm-2D.py : Produces the dispalcement fields obtaiend by classical continuums mechanics 
 * bondbased1D.py : Runs the simulation for the one-dimensonal problem
 * bondbased2d.py : RUns the simulation for the two-dimensonal linear elastic problem
-* bondbased2d-crack.py " Runs the simulation for the two-dimensional fracture problem
+* bondbased2d-tensile.py " Runs the simulation for the two-dimensional fracture problem using a tensile test geometry
+* bondbased2d-plate.py " Runs the simulation for the two-dimensional fracture problem using a pre-cracked square plate
 
 
 ## Usage
