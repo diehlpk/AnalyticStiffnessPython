@@ -1,4 +1,5 @@
 #Protoype for the 2D bond-based analytic stiffness matrix including fracture
+# using a tensile test geometry
 #@author Patrick Diehl (patrickdiehl@lsu.edu)
 #@date September 2020
 import numpy as np 
@@ -14,7 +15,6 @@ rc('text', usetex=True)
 rc('font', size=14)
 
 np.set_printoptions(precision=4)
-#mpl.style.use('seaborn')
 
 class Compute:
 
@@ -76,6 +76,8 @@ class Compute:
         # Search neighbors
         self.searchNeighbors()
 
+        self.f = np.zeros(2*len(self.nodes))
+
         if self.iter == 1:
 
             # Initialize 
@@ -86,15 +88,12 @@ class Compute:
             self.uCurrent = np.load(filehandler)
 
 
+
         #Apply the load to the body force vector
         self.b = np.zeros(2*len(self.nodes))
         for i in range(0,len(self.nodes)):
             if i in self.load:
-                self.b[2*i+1] = 4000000 / (50*19)
-                    #print(i,2*i+1)
-
-        self.f = np.zeros(2*len(self.nodes))
-
+                self.b[2*i+1] = 4000000 / (50*19) / 10
 
         print("Matrix size "+str(2*len(self.nodes))+"x"+str(2*len(self.nodes)))
      
@@ -117,13 +116,13 @@ class Compute:
                         #plt.plot([self.nodes[i][0],self.nodes[j][0]],[self.nodes[i][1],self.nodes[j][1]],c="#91A3B0",alpha=0.15)
             neighbor.append(len(self.neighbors[i]))
 
-        plt.scatter(self.nodes[:,0],self.nodes[:,1],c=neighbor)
-        plt.xlabel("Position $x$",fontsize = 30)
-        plt.ylabel("Position $y$",fontsize = 30)
-        clb = plt.colorbar()
-        clb.set_label(r'$B_\delta(x)$',labelpad=5)
-        plt.savefig("grid-crack.pdf",bbox_inches='tight')
-        plt.clf()
+        #plt.scatter(self.nodes[:,0],self.nodes[:,1],c=neighbor)
+        #plt.xlabel("Position $x$",fontsize = 30)
+        #plt.ylabel("Position $y$",fontsize = 30)
+        #clb = plt.colorbar()
+        #clb.set_label(r'$B_\delta(x)$',labelpad=5)
+        #plt.savefig("grid-crack.pdf",bbox_inches='tight')
+        #plt.clf()
 
     def L(self,i,j):
         r = np.sqrt(self.length(i,j)) * self.S(i,j)
@@ -132,7 +131,7 @@ class Compute:
 
     def residual(self,iter):
         self.f.fill(0)
-        self.f += self.b * iter
+        self.f += self.b * iter + ((self.iter-1) * 4000000 / (50*19))
 
         for i in range(0,len(self.nodes)):
             for j in self.neighbors[i]:
@@ -181,11 +180,12 @@ class Compute:
 
 
     def assemblymatrix(self):
-        self.matrix = np.zeros((2*len(self.nodes),2*len(self.nodes)))
+        self.matrix = np.zeros((2*len(self.nodes),2*len(self.nodes)),dtype=np.double)
         for i in range(0,len(self.nodes)):
             if not i in self.fix:
                 for j in self.neighbors[i]:
                     tmp = self.A(i,j)
+            
                     #Set the matrix entries for the neighbors
                     self.matrix[i*2][j*2] +=  tmp[0,0]
                     self.matrix[i*2][j*2+1] +=  tmp[0,1]
@@ -198,25 +198,16 @@ class Compute:
                     self.matrix[i*2+1][i*2+1] -=  tmp[1,1]
 
     def E(self,i,j):
-        #xi = self.e(i,j)
-        #xj = self.e(j,i)
-        #return np.array([[xi[0]*xi[0], xi[0]*xi[1]],[xi[0]*xi[1],xi[1]*xi[1]]])
         return np.tensordot(self.e(i,j),self.e(j,i),axes=0)
-
-    def intersect(self,A,B,C,D):
-        line = LineString([(A[0], A[1]), (B[0], B[1])])
-        other = LineString([(C[0], C[1]), (D[0], D[1])])
-        return line.intersects(other)
 
     def solve(self,maxIt,epsilion):
 
-        
+        for iter in range(1,maxIt+1):
 
-        for iter in range(self.iter,maxIt+1):
-
-            print(" ##### Load step: " + str(iter) + " #####")
+            print(" ##### Load step: " + str(iter+self.iter-1) + " #####")
             self.residual(iter)
             print("Residual with intial guess",np.linalg.norm(self.f))
+
 
             residual = np.finfo(np.float).max
 
@@ -237,21 +228,19 @@ class Compute:
                     self.matrix = np.delete(self.matrix,index,1)
                     self.matrix = np.delete(self.matrix,index,0)
 
-                
-                res = linalg.solve(self.matrix,b)
+                inv = linalg.inv(self.matrix)
+
+                res = inv.dot(b)
+
         
                 unew = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
                 j = 0
                 for i in range(0,len(self.uCurrent)):
                     if not i in self.fix: 
-                        unew[i] = [res[2*j],res[2*j+1]]
+                        unew[i] = np.array([res[2*j],res[2*j+1]])
                         j += 1
 
-
-
                 self.uCurrent += unew
-
-
 
                 self.residual(iter)
                 residual = np.linalg.norm(self.f) 
@@ -262,6 +251,7 @@ class Compute:
             self.dump(iter)
 
     def plot(self,iter):
+        step = iter + self.iter
         # Plot u_x
         plt.scatter(self.nodes[:,0]+self.uCurrent[:,0],self.nodes[:,1]+self.uCurrent[:,1],c=abs(self.uCurrent[:,0]))
         ax = plt.gca()
@@ -271,7 +261,7 @@ class Compute:
         clb.set_label(r'Displacement $ u_x $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-crack-u-x-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+".pdf",bbox_inches='tight')
+        plt.savefig("bond-based-2d-crack-u-x-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+".pdf",bbox_inches='tight')
         plt.clf()
         # Plot u_y
         plt.scatter(self.nodes[:,0]+self.uCurrent[:,0],self.nodes[:,1]+self.uCurrent[:,1],c=self.uCurrent[:,1])
@@ -282,7 +272,7 @@ class Compute:
         clb.set_label(r'Displacement $ u_y $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-crack-u-y-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+".pdf",bbox_inches='tight')
+        plt.savefig("bond-based-2d-crack-u-y-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+".pdf",bbox_inches='tight')
         plt.clf()
         # Plot damage
         plt.scatter(self.nodes[:,0]+self.uCurrent[:,0],self.nodes[:,1]+self.uCurrent[:,1],c=self.d)
@@ -293,22 +283,22 @@ class Compute:
         clb.set_label(r'Damage',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+".pdf",bbox_inches='tight')
+        plt.savefig("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+".pdf",bbox_inches='tight')
         plt.clf()
 
     def dump(self,iter):
-        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-displacement.npy", "wb")
+        step = iter + self.iter
+        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-displacement.npy", "wb")
         np.save(filehandler, self.uCurrent)
-        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-damage.npy", "wb")
+        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-damage.npy", "wb")
         np.save(filehandler,self.damage)
-        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-b.npy", "wb")
+        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-b.npy", "wb")
         np.save(filehandler,self.b)
-        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(iter)+"-f.npy", "wb")
+        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-f.npy", "wb")
         np.save(filehandler,self.f)
 
 
 if __name__=="__main__": 
 
     c = Compute(float(sys.argv[1]),int(sys.argv[2]),int(sys.argv[3]))
-    c.solve(40,1e-6)
-    #c.plot()
+    c.solve(100,1e-6)
