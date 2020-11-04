@@ -111,18 +111,8 @@ class Compute:
             self.neighbors.append([])
             for j in range(0,len(self.nodes)):
                 if i != j and self.length(j,i) <= self.delta:
-                    if not self.intersect(left,right,self.nodes[i],self.nodes[j]):
-                        self.neighbors[i].append(j)
-                        #plt.plot([self.nodes[i][0],self.nodes[j][0]],[self.nodes[i][1],self.nodes[j][1]],c="#91A3B0",alpha=0.15)
+                    self.neighbors[i].append(j)
             neighbor.append(len(self.neighbors[i]))
-
-        #plt.scatter(self.nodes[:,0],self.nodes[:,1],c=neighbor)
-        #plt.xlabel("Position $x$",fontsize = 30)
-        #plt.ylabel("Position $y$",fontsize = 30)
-        #clb = plt.colorbar()
-        #clb.set_label(r'$B_\delta(x)$',labelpad=5)
-        #plt.savefig("grid-crack.pdf",bbox_inches='tight')
-        #plt.clf()
 
     def L(self,i,j):
         r = np.sqrt(self.length(i,j)) * self.S(i,j)
@@ -291,7 +281,7 @@ class Compute:
         filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-displacement.npy", "wb")
         np.save(filehandler, self.uCurrent)
         filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-damage.npy", "wb")
-        np.save(filehandler,self.damage)
+        np.save(filehandler,self.d)
         filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-b.npy", "wb")
         np.save(filehandler,self.b)
         filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-f.npy", "wb")
@@ -301,4 +291,4 @@ class Compute:
 if __name__=="__main__": 
 
     c = Compute(float(sys.argv[1]),int(sys.argv[2]),int(sys.argv[3]))
-    c.solve(100,1e-6)
+    c.solve(20,1e-6)
