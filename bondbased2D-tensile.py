@@ -84,7 +84,7 @@ class Compute:
             self.uCurrent = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
 
         else:
-            filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(self.iter-1)+"-displacement.npy", "rb")
+            filehandler = open("bond-based-2d-tensile-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(self.iter-1)+"-displacement.npy", "rb")
             self.uCurrent = np.load(filehandler)
 
 
@@ -93,7 +93,7 @@ class Compute:
         self.b = np.zeros(2*len(self.nodes))
         for i in range(0,len(self.nodes)):
             if i in self.load:
-                self.b[2*i+1] = 4000000 / (50*19) / 10
+                self.b[2*i+1] = 4000000 / (50*19)
 
         print("Matrix size "+str(2*len(self.nodes))+"x"+str(2*len(self.nodes)))
      
@@ -121,7 +121,7 @@ class Compute:
 
     def residual(self,iter):
         self.f.fill(0)
-        self.f += self.b * iter + ((self.iter-1) * 4000000 / (50*19))
+        self.f += self.b * iter 
 
         for i in range(0,len(self.nodes)):
             for j in self.neighbors[i]:
@@ -251,7 +251,7 @@ class Compute:
         clb.set_label(r'Displacement $ u_x $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-crack-u-x-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+".pdf",bbox_inches='tight')
+        plt.savefig("bond-based-2d-tensile-u-x-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+".pdf",bbox_inches='tight')
         plt.clf()
         # Plot u_y
         plt.scatter(self.nodes[:,0]+self.uCurrent[:,0],self.nodes[:,1]+self.uCurrent[:,1],c=self.uCurrent[:,1])
@@ -262,7 +262,7 @@ class Compute:
         clb.set_label(r'Displacement $ u_y $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-crack-u-y-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+".pdf",bbox_inches='tight')
+        plt.savefig("bond-based-2d-tensile-u-y-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+".pdf",bbox_inches='tight')
         plt.clf()
         # Plot damage
         plt.scatter(self.nodes[:,0]+self.uCurrent[:,0],self.nodes[:,1]+self.uCurrent[:,1],c=self.d)
@@ -273,18 +273,18 @@ class Compute:
         clb.set_label(r'Damage',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-crack-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+".pdf",bbox_inches='tight')
+        plt.savefig("bond-based-2d-tensile-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+".pdf",bbox_inches='tight')
         plt.clf()
 
     def dump(self,iter):
         step = iter + self.iter
-        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-displacement.npy", "wb")
+        filehandler = open("bond-based-2d-tensile-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-displacement.npy", "wb")
         np.save(filehandler, self.uCurrent)
-        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-damage.npy", "wb")
+        filehandler = open("bond-based-2d-tensile-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-damage.npy", "wb")
         np.save(filehandler,self.d)
-        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-b.npy", "wb")
+        filehandler = open("bond-based-2d-tensile-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-b.npy", "wb")
         np.save(filehandler,self.b)
-        filehandler = open("bond-based-2d-crack-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-f.npy", "wb")
+        filehandler = open("bond-based-2d-tensile-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-f.npy", "wb")
         np.save(filehandler,self.f)
 
 
