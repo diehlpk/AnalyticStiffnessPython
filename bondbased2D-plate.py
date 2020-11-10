@@ -1,5 +1,5 @@
 #Protoype for the 2D bond-based analytic stiffness matrix including fracture
-# using a tensile test geometry
+# using a pre-crack square plate
 #@author Patrick Diehl (patrickdiehl@lsu.edu)
 #@date September 2020
 import numpy as np 
@@ -99,9 +99,9 @@ class Compute:
         self.b = np.zeros(2*len(self.nodes))
         for i in range(0,len(self.nodes)):
             if i in self.loadT:
-                self.b[2*i+1] = 4000000 / (self.delta*self.delta)
+                self.b[2*i+1] = 40000 / (self.delta*self.delta)
             if i in self.loadB:
-                self.b[2*i+1] = -(4000000) / (self.delta*self.delta)            
+                self.b[2*i+1] = -(40000) / (self.delta*self.delta)            
 
         print("Matrix size "+str(2*len(self.nodes))+"x"+str(2*len(self.nodes)))
      
@@ -112,8 +112,8 @@ class Compute:
         neighbor = []
 
 
-        fig = plt.gcf()
-        fig.set_size_inches(4,50)
+        #fig = plt.gcf()
+        #fig.set_size_inches(4,50)
 
         for i in range(0,len(self.nodes)):
             self.neighbors.append([])
@@ -323,5 +323,5 @@ class Compute:
 if __name__=="__main__": 
 
     c = Compute(float(sys.argv[1]),int(sys.argv[2]),int(sys.argv[3]))
-    c.solve(100,1e-6)
+    c.solve(100,1e-4)
     #c.plot()
