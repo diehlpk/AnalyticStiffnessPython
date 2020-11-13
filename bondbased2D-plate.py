@@ -34,7 +34,7 @@ class Compute:
         self.h = h
         self.delta_factor = delta_factor
         self.delta = self.delta_factor*h
-        n = int(5/self.h) + 1
+        n = int(15/self.h) + 1
         self.fix = []
         self.loadT = []
         self.loadB = []
@@ -52,22 +52,23 @@ class Compute:
                     self.loadB.append(index)
                     #plt.scatter(i*h,j*h)
                    
-                if  j * h > 5 - self.delta and i * h < 2 * self.delta:
+                if  j * h > 15 - self.delta and i * h < 2 * self.delta:
                     self.loadT.append(index)
                     #plt.scatter(i*h,j*h)
 
-                if j*h < self.delta and i * h > 5 - self.delta:
+                if j*h < self.delta and i * h > 15 - self.delta:
                     self.fix.append(index)
                     #plt.scatter(i*h,j*h)
 
-                if j * h > 5 - self.delta and i * h > 5 - self.delta:
+                if j * h > 15 - self.delta and i * h > 15 - self.delta:
                     self.fix.append(index)
                     #plt.scatter(i*h,j*h)
                    
                 index += 1     
         
-
-
+        
+        #plt.show()
+        #sys.exit(1)
  
         self.fix = np.sort(self.fix)
 
@@ -107,8 +108,8 @@ class Compute:
      
 
     def searchNeighbors(self):
-        left = np.array([0,2.5])
-        right = np.array([2.5,2.5])
+        left = np.array([0,7.5])
+        right = np.array([7.5,7.5])
         neighbor = []
 
 
@@ -139,7 +140,7 @@ class Compute:
 
     def residual(self,iter):
         self.f.fill(0)
-        self.f += self.b * iter + ((self.iter-1) * 4000000 / (50*19))
+        self.f += self.b * iter 
 
         for i in range(0,len(self.nodes)):
             for j in self.neighbors[i]:
