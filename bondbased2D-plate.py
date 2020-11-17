@@ -52,15 +52,15 @@ class Compute:
                     self.loadB.append(index)
                     #plt.scatter(i*h,j*h)
                    
-                if  j * h > 15 - self.delta and i * h < 2 * self.delta:
+                if  j * h > 15 + h - self.delta and i * h < 2 * self.delta:
                     self.loadT.append(index)
                     #plt.scatter(i*h,j*h)
 
-                if j*h < self.delta and i * h > 15 - self.delta:
+                if j*h < self.delta and i * h > 15 + h - self.delta:
                     self.fix.append(index)
                     #plt.scatter(i*h,j*h)
 
-                if j * h > 15 - self.delta and i * h > 15 - self.delta:
+                if j * h > 15 + h - self.delta and i * h > 15 + h - self.delta:
                     self.fix.append(index)
                     #plt.scatter(i*h,j*h)
                    
