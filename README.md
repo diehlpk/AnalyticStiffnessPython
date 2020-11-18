@@ -1,4 +1,4 @@
-Examples: Title 
+# Analytic stiffness matrix
 
 ## Dependencies
 
