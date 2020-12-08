@@ -92,6 +92,7 @@ class Compute:
 
         else:
             filehandler = open("bond-based-2d-plate-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(self.iter-1)+"-displacement.npy", "rb")
+            #self.nodes += np.load(filehandler)
             self.uCurrent = np.load(filehandler)
 
 
@@ -140,7 +141,7 @@ class Compute:
 
     def residual(self,iter):
         self.f.fill(0)
-        self.f += self.b * iter 
+        self.f += self.b * (iter) + ((self.iter-2)*self.b) 
 
         for i in range(0,len(self.nodes)):
             for j in self.neighbors[i]:
@@ -218,7 +219,7 @@ class Compute:
 
         for iter in range(1,maxIt+1):
 
-            print(" ##### Load step: " + str(iter+self.iter-1) + " #####")
+            print(" ##### Load step: " + str(iter+self.iter) + " #####")
             self.residual(iter)
             print("Residual with intial guess",np.linalg.norm(self.f))
 
