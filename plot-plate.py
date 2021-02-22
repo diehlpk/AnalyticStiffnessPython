@@ -64,7 +64,7 @@ if __name__=="__main__":
     #plt.ylim([-2,21])
     #plt.xlim([0,max(nodes[:,1]+uCurrent[:,1])])
     v = np.linspace(min(uCurrent[:,1]), max(uCurrent[:,1]), 6, endpoint=True)
-    clb = plt.colorbar(ticks=v)
+    clb = plt.colorbar(ticks=v,format='%.1e')
     clb.set_label(r'Displacement $u_y$')
     plt.savefig("bond-based-2d-plate-"+str(h)+"-"+str(delta_factor)+"-"+str(iter)+"-u-y-rotated.pdf",bbox_inches='tight')
 
@@ -82,7 +82,7 @@ if __name__=="__main__":
     #plt.ylim([-2,21])
     #plt.xlim([0,max(nodes[:,1])])
     v = np.linspace(min(damage), max(damage), 6, endpoint=True)
-    clb = plt.colorbar(ticks=v)
+    clb = plt.colorbar(ticks=v,format='%.1e')
     clb.set_label(r'Damage')
     plt.savefig("bond-based-2d-plate-"+str(h)+"-"+str(delta_factor)+"-"+str(iter)+"-d-rotated.pdf",bbox_inches='tight')
 
