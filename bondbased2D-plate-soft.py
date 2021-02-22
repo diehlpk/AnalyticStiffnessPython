@@ -25,7 +25,7 @@ class Compute:
     # Config
     E=4000
     G=E/(2*(1+1/3))
-    beta=0.1
+    beta=10
     C=300000000
     rbar=np.sqrt(0.5/beta)
  
@@ -48,11 +48,11 @@ class Compute:
             for j in range(0,n):
                 self.nodes.append([i*h,j*h])
 
-                if j*h < self.delta and i * h < 2 * self.delta :
+                if j*h < self.delta and i * h < 13 * self.delta :
                     self.loadB.append(index)
                     #plt.scatter(i*h,j*h)
                    
-                if  j * h > 15 + h - self.delta and i * h < 2 * self.delta:
+                if  j * h > 15 + h - self.delta and i * h < 13 * self.delta:
                     self.loadT.append(index)
                     #plt.scatter(i*h,j*h)
 
@@ -99,11 +99,17 @@ class Compute:
 
         #Apply the load to the body force vector
         self.b = np.zeros(2*len(self.nodes))
+        self.b2 = np.zeros(2*len(self.nodes))
+        self.b3 = np.zeros(2*len(self.nodes))
         for i in range(0,len(self.nodes)):
             if i in self.loadT:
-                self.b[2*i+1] = 40000 / (self.delta*self.delta)
+                self.b[2*i+1] = 4e3 / (2*self.delta*self.delta)
+                self.b2[2*i+1] = 4e5 / (2*self.delta*self.delta)
+                self.b3[2*i+1] = 4e6 / (2*self.delta*self.delta)
             if i in self.loadB:
-                self.b[2*i+1] = -(40000) / (self.delta*self.delta)            
+                self.b[2*i+1] = -(4e3) / (2*self.delta*self.delta)            
+                self.b2[2*i+1] = -(4e5) / (2*self.delta*self.delta)            
+                self.b3[2*i+1] = -(4e6) / (2*self.delta*self.delta)            
 
         print("Matrix size "+str(2*len(self.nodes))+"x"+str(2*len(self.nodes)))
      
@@ -141,7 +147,7 @@ class Compute:
 
     def residual(self,iter):
         self.f.fill(0)
-        self.f += self.b * (iter) + ((self.iter-2)*self.b) 
+        self.f += self.b * (iter)+  self.b * 7  + 13 * self.b3 + 1 * self.b2
 
         for i in range(0,len(self.nodes)):
             for j in self.neighbors[i]:
@@ -325,5 +331,5 @@ class Compute:
 if __name__=="__main__": 
 
     c = Compute(float(sys.argv[1]),int(sys.argv[2]),int(sys.argv[3]))
-    c.solve(100,1e-4)
+    c.solve(100,1e-3)
     #c.plot()
