@@ -92,7 +92,7 @@ if __name__=="__main__":
     plt.ylim([-2,21])
     plt.xlim([0,max(nodes[:,1])])
     v = np.linspace(min(damage), max(damage), 3, endpoint=True)
-    clb = plt.colorbar(ticks=v,orientation="horizontal")
+    clb = plt.colorbar(ticks=v,orientation="horizontal",format='%.1e')
     clb.set_label(r'Damage')
     plt.savefig("bond-based-2d-tensile-"+str(h)+"-"+str(delta_factor)+"-"+str(iter)+"-d-rotated.pdf",bbox_inches='tight')
 
