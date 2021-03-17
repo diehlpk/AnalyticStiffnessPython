@@ -1,5 +1,5 @@
 #Protoype for the 2D bond-based analytic stiffness matrix including fracture
-# using a pre-crack square plate
+# using a pre-crack square plate (soft loading)
 #@author Patrick Diehl (patrickdiehl@lsu.edu)
 #@date September 2020
 import numpy as np 
@@ -50,26 +50,22 @@ class Compute:
 
                 if j*h < self.delta and i * h < 13 * self.delta :
                     self.loadB.append(index)
-                    #plt.scatter(i*h,j*h)
+                
                    
                 if  j * h > 15 + h - self.delta and i * h < 13 * self.delta:
                     self.loadT.append(index)
-                    #plt.scatter(i*h,j*h)
+                   
 
                 if j*h < self.delta and i * h > 15 + h - self.delta:
                     self.fix.append(index)
-                    #plt.scatter(i*h,j*h)
+                   
 
                 if j * h > 15 + h - self.delta and i * h > 15 + h - self.delta:
                     self.fix.append(index)
-                    #plt.scatter(i*h,j*h)
+                    
                    
                 index += 1     
         
-        
-        #plt.show()
-        #sys.exit(1)
- 
         self.fix = np.sort(self.fix)
 
         self.nodes = np.array(self.nodes)
@@ -95,8 +91,6 @@ class Compute:
             #self.nodes += np.load(filehandler)
             self.uCurrent = np.load(filehandler)
 
-
-
         #Apply the load to the body force vector
         self.b = np.zeros(2*len(self.nodes))
         self.b2 = np.zeros(2*len(self.nodes))
@@ -119,26 +113,14 @@ class Compute:
         right = np.array([7.5,7.5])
         neighbor = []
 
-
-        #fig = plt.gcf()
-        #fig.set_size_inches(4,50)
-
         for i in range(0,len(self.nodes)):
             self.neighbors.append([])
             for j in range(0,len(self.nodes)):
                 if i != j and self.length(j,i) <= self.delta:
                     if not self.intersect(left,right,self.nodes[i],self.nodes[j]):
                         self.neighbors[i].append(j)
-                        #plt.plot([self.nodes[i][0],self.nodes[j][0]],[self.nodes[i][1],self.nodes[j][1]],c="#91A3B0",alpha=0.15)
             neighbor.append(len(self.neighbors[i]))
 
-        #plt.scatter(self.nodes[:,0],self.nodes[:,1],c=neighbor)
-        #plt.xlabel("Position $x$",fontsize = 30)
-        #plt.ylabel("Position $y$",fontsize = 30)
-        #clb = plt.colorbar()
-        #clb.set_label(r'$B_\delta(x)$',labelpad=5)
-        #plt.show()
-        #sys.exit()
 
     def L(self,i,j):
         r = np.sqrt(self.length(i,j)) * self.S(i,j)
@@ -249,16 +231,10 @@ class Compute:
                     self.matrix = np.delete(self.matrix,index,1)
                     self.matrix = np.delete(self.matrix,index,0)
 
-                
-                #print("Con:" + str(np.linalg.cond(self.matrix))+" Det: "+str(np.linalg.det(self.matrix)))
-
-                #res = linalg.solve(self.matrix,b)
-
                 inv = linalg.inv(self.matrix)
 
                 res = inv.dot(b)
 
-        
                 unew = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
                 j = 0
                 for i in range(0,len(self.uCurrent)):
@@ -332,4 +308,3 @@ if __name__=="__main__":
 
     c = Compute(float(sys.argv[1]),int(sys.argv[2]),int(sys.argv[3]))
     c.solve(100,1e-3)
-    #c.plot()
