@@ -1,5 +1,5 @@
 #Protoype for the 2D bond-based analytic stiffness matrix including fracture
-# using a pre-crack square plate
+# using a pre-crack square plate (hard loading)
 #@author Patrick Diehl (patrickdiehl@lsu.edu)
 #@date September 2020
 import numpy as np 
@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import sys
 import pickle 
+import random
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
@@ -36,43 +37,43 @@ class Compute:
         self.delta = self.delta_factor*h
         n = int(15/self.h) + 1
         self.fix = []
-        self.loadT = []
-        self.loadB = []
+        #self.loadT = []
+        #self.loadB = []
         self.z = []
         self.iter = iter
 
         #Generate grid
         index = 0
-
         for i in range(0,n):
-            for j in range(0,n):
-                self.nodes.append([i*h,j*h])
+            for j in range(0,n+2*self.delta_factor):
+                self.nodes.append([i*h,(j-self.delta_factor)*h])
 
-                if j*h < self.delta and i * h < 13 * self.delta :
-                    self.loadB.append(index)
-                    #plt.scatter(i*h,j*h)
+                #if j*h < self.delta and i * h < 13 * self.delta :
+                #    self.loadB.append(index)
+                #    #plt.scatter(i*h,j*h)
                    
-                if  j * h > 15 + h - self.delta and i * h < 13 * self.delta:
-                    self.loadT.append(index)
-                    #plt.scatter(i*h,j*h)
+                #if  j * h > 15 + h - self.delta and i * h < 13 * self.delta:
+                #    self.loadT.append(index)
+                #    #plt.scatter(i*h,j*h)
 
-                if j*h < self.delta and i * h > 15 + h - self.delta:
-                    self.fix.append(index)
-                    #plt.scatter(i*h,j*h)
+                #if j*h < s and i * h > 15 + h - self.delta:
+                #    self.fix.append(index)
+                #    #plt.scatter(i*h,j*h)
 
-                if j * h > 15 + h - self.delta and i * h > 15 + h - self.delta:
-                    self.fix.append(index)
-                    #plt.scatter(i*h,j*h)
-                   
+                #if j * h > 15 + h - self.delta and i * h > 15 + h - self.delta:
+                #    self.fix.append(index)
+                #    #plt.scatter(i*h,j*h)
+                #plt.scatter(i*h,(j-self.delta_factor)*h)
+            
                 index += 1     
-        
-        
+        self.nodes = np.array(self.nodes)
+
         #plt.show()
         #sys.exit(1)
  
-        self.fix = np.sort(self.fix)
+        #self.fix = np.sort(self.fix)
 
-        self.nodes = np.array(self.nodes)
+        #self.nodes = np.array(self.nodes)
 
         self.V = np.empty(len(self.nodes))
         self.V.fill(h*h)
@@ -85,31 +86,79 @@ class Compute:
 
         self.f = np.zeros(2*len(self.nodes))
 
+        #self.b = np.full(2*len(self.nodes),1)
+
         if self.iter == 1:
 
             # Initialize 
             self.uCurrent = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
+            self.wCurrent = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
+
+            #Apply the boundary load to the extension
+
+            
+            #scale = 1/7
+
+
+            for i in range(0,len(self.nodes)):
+                if self.nodes[i][1] < 0  and self.nodes[i][0] < 13 * self.delta  :
+                    self.wCurrent[i][1] = .25 
+
+                if self.nodes[i][1] > 15 and self.nodes[i][0] < 13 * self.delta :
+                    self.wCurrent[i][1] = -.25 
+
+                if self.nodes[i][1] > 15 and self.nodes[i][0] >= 15 * h - self.delta :
+                    self.fix.append(i)
+
+                if self.nodes[i][1] < 0 and self.nodes[i][0] >= 15* h - self.delta :
+                    self.fix.append(i)
+                
+            self.fix = np.sort(self.fix)
+                
+                    
+            #plt.scatter(self.nodes[:,0],self.nodes[:,1],c=self.wCurrent[:,1])
+            #plt.colorbar()
+            #plt.show()
+            #sys.exit(1)
 
         else:
-            filehandler = open("bond-based-2d-plate-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(self.iter-1)+"-displacement.npy", "rb")
+            print("Restart not implemented yet")
+            #filehandler = open("bond-based-2d-plate-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(self.iter-1)+"-displacement.npy", "rb")
             #self.nodes += np.load(filehandler)
-            self.uCurrent = np.load(filehandler)
+            #self.uCurrent = np.load(filehandler)
 
 
 
         #Apply the load to the body force vector
-        self.b = np.zeros(2*len(self.nodes))
-        self.b2 = np.zeros(2*len(self.nodes))
-        self.b3 = np.zeros(2*len(self.nodes))
-        for i in range(0,len(self.nodes)):
-            if i in self.loadT:
-                self.b[2*i+1] = 4e3 / (2*self.delta*self.delta)
-                self.b2[2*i+1] = 4e5 / (2*self.delta*self.delta)
-                self.b3[2*i+1] = 4e6 / (2*self.delta*self.delta)
-            if i in self.loadB:
-                self.b[2*i+1] = -(4e3) / (2*self.delta*self.delta)            
-                self.b2[2*i+1] = -(4e5) / (2*self.delta*self.delta)            
-                self.b3[2*i+1] = -(4e6) / (2*self.delta*self.delta)            
+        #self.b = np.zeros(2*len(self.nodes))
+        #self.b2 = np.zeros(2*len(self.nodes))
+        #self.b3 = np.zeros(2*len(self.nodes))
+
+        #self.b = np.zeros(2*len(self.nodes))
+
+        #self.uCurrent += self.wCurrent
+
+        #for i in range(0,len(self.nodes)):
+        #    for j in self.neighbors[i]:
+        #        
+        #        tmp =  self.L(i,j)
+        #        self.b[2*i] += tmp[0] 
+        #        self.b[2*i+1] += tmp[1] 
+
+        #self.uCurrent -= self.wCurrent
+
+        #print(self.b)
+        
+        #sys.exit(1)
+        #for i in range(0,len(self.nodes)):
+        #    if i in self.loadT:
+        #        self.b[2*i+1] = 4e3 / (2*self.delta*self.delta)
+        #        self.b2[2*i+1] = 4e5 / (2*self.delta*self.delta)
+        #        self.b3[2*i+1] = 4e6 / (2*self.delta*self.delta)
+        #    if i in self.loadB:
+        #        self.b[2*i+1] = -(4e3) / (2*self.delta*self.delta)            
+        #        self.b2[2*i+1] = -(4e5) / (2*self.delta*self.delta)            
+        #        self.b3[2*i+1] = -(4e6) / (2*self.delta*self.delta)            
 
         print("Matrix size "+str(2*len(self.nodes))+"x"+str(2*len(self.nodes)))
      
@@ -147,16 +196,31 @@ class Compute:
 
     def residual(self,iter):
         self.f.fill(0)
-        self.f += self.b * (iter)+  self.b * 7  + 13 * self.b3 + 1 * self.b2
+
+        self.uCurrent += iter * self.wCurrent
+    
+        for i in range(0,len(self.nodes)):
+            for j in self.neighbors[i]:
+                
+                tmp =  self.L(i,j)
+                self.f[2*i] += tmp[0] 
+                self.f[2*i+1] += tmp[1] 
+
+        self.uCurrent -= iter * self.wCurrent
+
+
+    def computeDamage(self):
 
         for i in range(0,len(self.nodes)):
             for j in self.neighbors[i]:
-                if not i in self.fix:
-                    tmp =  self.L(i,j)
-                    self.f[2*i] += tmp[0] 
-                    self.f[2*i+1] += tmp[1] 
+                
+                tmp =  self.L(i,j)
+                self.f[2*i] += tmp[0] 
+                self.f[2*i+1] += tmp[1] 
 
                 self.damage(i,j)
+
+
 
     def damage(self,i,j):
         z = self.d[i]
@@ -198,20 +262,20 @@ class Compute:
     def assemblymatrix(self):
         self.matrix = np.zeros((2*len(self.nodes),2*len(self.nodes)),dtype=np.double)
         for i in range(0,len(self.nodes)):
-            if not i in self.fix:
-                for j in self.neighbors[i]:
-                    tmp = self.A(i,j)
+            
+            for j in self.neighbors[i]:
+                tmp = self.A(i,j)
            
-                    #Set the matrix entries for the neighbors
-                    self.matrix[i*2][j*2] +=  tmp[0,0]
-                    self.matrix[i*2][j*2+1] +=  tmp[0,1]
-                    self.matrix[i*2+1][j*2] +=  tmp[1,0]
-                    self.matrix[i*2+1][j*2+1] +=  tmp[1,1]
-                    #set the matrix entries for the node it self
-                    self.matrix[i*2][i*2] -=  tmp[0,0]
-                    self.matrix[i*2][i*2+1] -=  tmp[0,1]
-                    self.matrix[i*2+1][i*2] -=  tmp[1,0]
-                    self.matrix[i*2+1][i*2+1] -=  tmp[1,1]
+                #Set the matrix entries for the neighbors
+                self.matrix[i*2][j*2] +=  tmp[0,0]
+                self.matrix[i*2][j*2+1] +=  tmp[0,1]
+                self.matrix[i*2+1][j*2] +=  tmp[1,0]
+                self.matrix[i*2+1][j*2+1] +=  tmp[1,1]
+                #set the matrix entries for the node it self
+                self.matrix[i*2][i*2] -=  tmp[0,0]
+                self.matrix[i*2][i*2+1] -=  tmp[0,1]
+                self.matrix[i*2+1][i*2] -=  tmp[1,0]
+                self.matrix[i*2+1][i*2+1] -=  tmp[1,1]
 
     def E(self,i,j):
         return np.tensordot(self.e(i,j),self.e(j,i),axes=0)
@@ -225,9 +289,10 @@ class Compute:
 
         for iter in range(1,maxIt+1):
 
+        
             print(" ##### Load step: " + str(iter+self.iter) + " #####")
             self.residual(iter)
-            print("Residual with intial guess",np.linalg.norm(self.f))
+            print("Residual with intial guess",np.linalg.norm(self.wCurrent)-np.linalg.norm(self.uCurrent))
 
 
             residual = np.finfo(np.float).max
@@ -237,10 +302,11 @@ class Compute:
 
                 self.assemblymatrix()  
 
+    
                 b = np.copy(self.f)
-                
+            
                 for i in range(0,len(self.fix)):
-
+                    
                     index = 2* self.fix[len(self.fix)-1-i]
                     b = np.delete(b,index+1)
                     b = np.delete(b,index)
@@ -249,15 +315,9 @@ class Compute:
                     self.matrix = np.delete(self.matrix,index,1)
                     self.matrix = np.delete(self.matrix,index,0)
 
-                
-                #print("Con:" + str(np.linalg.cond(self.matrix))+" Det: "+str(np.linalg.det(self.matrix)))
-
-                #res = linalg.solve(self.matrix,b)
-
                 inv = linalg.inv(self.matrix)
 
-                res = inv.dot(b)
-
+                res = inv.dot(-b)
         
                 unew = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
                 j = 0
@@ -266,17 +326,26 @@ class Compute:
                         unew[i] = np.array([res[2*j],res[2*j+1]])
                         j += 1
 
+                #plt.scatter(self.nodes[:,0],self.nodes[:,1],c=self.uCurrent[:,1])
+                #plt.colorbar()
+                #plt.xlabel("X")
+                #plt.xlabel("Y")
+                #plt.title("u current")
+                #plt.show()
 
 
                 self.uCurrent += unew
 
-
-
                 self.residual(iter)
-                residual = np.linalg.norm(self.f) 
+
+                residual = np.linalg.norm(iter * self.wCurrent) - np.linalg.norm(self.uCurrent) 
                 print("Iteration ",it," Residual: ",residual)
                 it += 1
 
+                #if it == 10 :
+                #    break
+
+            self.computeDamage()
             self.plot(iter)
             self.dump(iter)
 
@@ -291,7 +360,7 @@ class Compute:
         clb.set_label(r'Displacement $ u_x $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-plate-u-x-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+".pdf",bbox_inches='tight')
+        plt.savefig("bond-based-2d-plate-u-x-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-hard.pdf",bbox_inches='tight')
         plt.clf()
         # Plot u_y
         plt.scatter(self.nodes[:,0]+self.uCurrent[:,0],self.nodes[:,1]+self.uCurrent[:,1],c=self.uCurrent[:,1])
@@ -302,7 +371,7 @@ class Compute:
         clb.set_label(r'Displacement $ u_y $',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-plate-u-y-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+".pdf",bbox_inches='tight')
+        plt.savefig("bond-based-2d-plate-u-y-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-hard.pdf",bbox_inches='tight')
         plt.clf()
         # Plot damage
         plt.scatter(self.nodes[:,0]+self.uCurrent[:,0],self.nodes[:,1]+self.uCurrent[:,1],c=self.d)
@@ -313,23 +382,20 @@ class Compute:
         clb.set_label(r'Damage',labelpad=5)
         plt.xlabel("Position $x$")
         plt.ylabel("Position $y$")
-        plt.savefig("bond-based-2d-plate-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+".pdf",bbox_inches='tight')
+        plt.savefig("bond-based-2d-plate-d-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-hard.pdf",bbox_inches='tight')
         plt.clf()
 
     def dump(self,iter):
         step = iter + self.iter
-        filehandler = open("bond-based-2d-plate-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-displacement.npy", "wb")
+        filehandler = open("bond-based-2d-plate-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-displacement-hard.npy", "wb")
         np.save(filehandler, self.uCurrent)
-        filehandler = open("bond-based-2d-plate-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-damage.npy", "wb")
+        filehandler = open("bond-based-2d-plate-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-damage-hard.npy", "wb")
         np.save(filehandler,self.d)
-        filehandler = open("bond-based-2d-plate-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-b.npy", "wb")
-        np.save(filehandler,self.b)
-        filehandler = open("bond-based-2d-plate-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-f.npy", "wb")
+        filehandler = open("bond-based-2d-plate-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(step)+"-f-hard.npy", "wb")
         np.save(filehandler,self.f)
 
 
 if __name__=="__main__": 
 
     c = Compute(float(sys.argv[1]),int(sys.argv[2]),int(sys.argv[3]))
-    c.solve(100,1e-3)
-    #c.plot()
+    c.solve(1,1e-5)
