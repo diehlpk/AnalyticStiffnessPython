@@ -88,7 +88,7 @@ class Compute:
 
         #self.b = np.full(2*len(self.nodes),1)
 
-        if self.iter == 1:
+        if self.iter == 0:
 
             # Initialize 
             self.uCurrent = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
@@ -102,10 +102,10 @@ class Compute:
 
             for i in range(0,len(self.nodes)):
                 if self.nodes[i][1] < 0  and self.nodes[i][0] < 13 * self.delta  :
-                    self.wCurrent[i][1] = .25 
+                    self.wCurrent[i][1] = -.25 
 
                 if self.nodes[i][1] > 15 and self.nodes[i][0] < 13 * self.delta :
-                    self.wCurrent[i][1] = -.25 
+                    self.wCurrent[i][1] = .25 
 
                 if self.nodes[i][1] > 15 and self.nodes[i][0] >= 15 * h - self.delta :
                     self.fix.append(i)
@@ -317,7 +317,7 @@ class Compute:
 
                 inv = linalg.inv(self.matrix)
 
-                res = inv.dot(-b)
+                res = inv.dot(b)
         
                 unew = np.zeros(2*len(self.nodes)).reshape((len(self.nodes),2))
                 j = 0
