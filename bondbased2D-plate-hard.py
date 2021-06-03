@@ -37,35 +37,18 @@ class Compute:
         self.delta = self.delta_factor*h
         n = int(15/self.h) + 1
         self.fix = []
-        #self.loadT = []
-        #self.loadB = []
+        self.loadT = []
+        self.loadB = []
         self.z = []
         self.iter = iter
 
         #Generate grid
-        index = 0
+        #index = 0
         for i in range(0,n):
             for j in range(0,n+2*self.delta_factor):
-                self.nodes.append([i*h,(j-self.delta_factor)*h])
+                self.nodes.append([i*h,(j-self.delta_factor)*h])            
+                #index += 1    
 
-                #if j*h < self.delta and i * h < 13 * self.delta :
-                #    self.loadB.append(index)
-                #    #plt.scatter(i*h,j*h)
-                   
-                #if  j * h > 15 + h - self.delta and i * h < 13 * self.delta:
-                #    self.loadT.append(index)
-                #    #plt.scatter(i*h,j*h)
-
-                #if j*h < s and i * h > 15 + h - self.delta:
-                #    self.fix.append(index)
-                #    #plt.scatter(i*h,j*h)
-
-                #if j * h > 15 + h - self.delta and i * h > 15 + h - self.delta:
-                #    self.fix.append(index)
-                #    #plt.scatter(i*h,j*h)
-                #plt.scatter(i*h,(j-self.delta_factor)*h)
-            
-                index += 1     
         self.nodes = np.array(self.nodes)
 
         #plt.show()
@@ -86,7 +69,7 @@ class Compute:
 
         self.f = np.zeros(2*len(self.nodes))
 
-        #self.b = np.full(2*len(self.nodes),1)
+        self.b = np.zeros(2*len(self.nodes))
 
         if self.iter == 0:
 
@@ -101,22 +84,48 @@ class Compute:
 
 
             for i in range(0,len(self.nodes)):
-                if self.nodes[i][1] < 0  and self.nodes[i][0] < 13 * self.delta  :
-                    self.wCurrent[i][1] = -.25 
+                if self.nodes[i][1] <= 0  : # and self.nodes[i][0] < 2.4  :
+                    self.wCurrent[i][1] = 0.125
+                    self.loadB.append(i)
+                   
+                elif self.nodes[i][1] >= 15 : #  and self.nodes[i][0] < 2.4 :
+                    self.wCurrent[i][1] = -0.125 
+                    self.loadT.append(i)    
 
-                if self.nodes[i][1] > 15 and self.nodes[i][0] < 13 * self.delta :
-                    self.wCurrent[i][1] = .25 
+                elif self.nodes[i][1] > 0 and self.nodes[i][1] <= 7.5  :
+                    self.wCurrent[i][1] = (.125  / 7.5)  * (7.5 -self.nodes[i][1]) 
 
-                if self.nodes[i][1] > 15 and self.nodes[i][0] >= 15 * h - self.delta :
+                elif self.nodes[i][1] < 15 and self.nodes[i][1] >= 7.5  :
+                    self.wCurrent[i][1] = (-.125  / 7.5)  * (self.nodes[i][1]-7.5) 
+              
+
+                if self.nodes[i][0] > 15 - h and self.nodes[i][1] >= 7.5 and self.nodes[i][1] < 7.5 + 1*h  :
+                    self.fix.append(i)  
+                    self.wCurrent[i][1] = 0
+                    print("d")
+
+                elif self.nodes[i][0] > 15-h  and self.nodes[i][1] < 7.5 and self.nodes[i][1] >= 7.5 - 1*h  :
                     self.fix.append(i)
+                    self.wCurrent[i][1] = 0
+                    print("d2")
 
-                if self.nodes[i][1] < 0 and self.nodes[i][0] >= 15* h - self.delta :
-                    self.fix.append(i)
+                #elif self.nodes[i][1] >= 15 and self.nodes[i][0] > 2.4 and  self.nodes[i][0] <= 15  :
+                 #   self.wCurrent[i][1] = -.125 / 5  
                 
+                #elif self.nodes[i][1] <= 0  and  self.nodes[i][0] > 2.4 and  self.nodes[i][0] <= 15   :
+                 #   self.wCurrent[i][1] = .125 / 5
+
+                #else:
+                    #plt.scatter(self.nodes[i][0],self.nodes[i][1],color="red")
+
             self.fix = np.sort(self.fix)
+            print(self.fix)
+     
+            #self.remove = np.concatenate([self.fix,self.loadT,self.loadB])
+            #self.remove = np.sort(self.remove)
                 
                     
-            #plt.scatter(self.nodes[:,0],self.nodes[:,1],c=self.wCurrent[:,1])
+            #plt.scatter(self.nodes[:,0],self.nodes[:,1],c=self.wCurrent[:,1],cmap="seismic")
             #plt.colorbar()
             #plt.show()
             #sys.exit(1)
@@ -126,39 +135,6 @@ class Compute:
             #filehandler = open("bond-based-2d-plate-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(self.iter-1)+"-displacement.npy", "rb")
             #self.nodes += np.load(filehandler)
             #self.uCurrent = np.load(filehandler)
-
-
-
-        #Apply the load to the body force vector
-        #self.b = np.zeros(2*len(self.nodes))
-        #self.b2 = np.zeros(2*len(self.nodes))
-        #self.b3 = np.zeros(2*len(self.nodes))
-
-        #self.b = np.zeros(2*len(self.nodes))
-
-        #self.uCurrent += self.wCurrent
-
-        #for i in range(0,len(self.nodes)):
-        #    for j in self.neighbors[i]:
-        #        
-        #        tmp =  self.L(i,j)
-        #        self.b[2*i] += tmp[0] 
-        #        self.b[2*i+1] += tmp[1] 
-
-        #self.uCurrent -= self.wCurrent
-
-        #print(self.b)
-        
-        #sys.exit(1)
-        #for i in range(0,len(self.nodes)):
-        #    if i in self.loadT:
-        #        self.b[2*i+1] = 4e3 / (2*self.delta*self.delta)
-        #        self.b2[2*i+1] = 4e5 / (2*self.delta*self.delta)
-        #        self.b3[2*i+1] = 4e6 / (2*self.delta*self.delta)
-        #    if i in self.loadB:
-        #        self.b[2*i+1] = -(4e3) / (2*self.delta*self.delta)            
-        #        self.b2[2*i+1] = -(4e5) / (2*self.delta*self.delta)            
-        #        self.b3[2*i+1] = -(4e6) / (2*self.delta*self.delta)            
 
         print("Matrix size "+str(2*len(self.nodes))+"x"+str(2*len(self.nodes)))
      
@@ -193,12 +169,28 @@ class Compute:
         r = np.sqrt(self.length(i,j)) * self.S(i,j)
         return (2./self.VB) * self.w(self.length(i,j))/self.delta  * self.f1(r) / self.length(i,j)  *  self.e(i,j) * self.V[j]
 
+    def computeLoad(self,iter):
+        self.b.fill(0)
+
+        #uCurrentCopy = np.copy(self.uCurrent)
+
+        self.uCurrent += iter * self.wCurrent
+
+        for i in range(0,len(self.nodes)):
+            for j in self.neighbors[i]:
+                
+                tmp =  self.L(i,j)
+                self.b[2*i] += tmp[0] 
+                self.b[2*i+1] += tmp[1] 
+
+        self.uCurrent -= iter * self.wCurrent  #np.copy(uCurrentCopy)
+
 
     def residual(self,iter):
         self.f.fill(0)
 
-        self.uCurrent += iter * self.wCurrent
-    
+        #self.uCurrent =+ iter * self.wCurrent
+
         for i in range(0,len(self.nodes)):
             for j in self.neighbors[i]:
                 
@@ -206,7 +198,7 @@ class Compute:
                 self.f[2*i] += tmp[0] 
                 self.f[2*i+1] += tmp[1] 
 
-        self.uCurrent -= iter * self.wCurrent
+        #self.uCurrent =- iter * self.wCurrent
 
 
     def computeDamage(self):
@@ -219,8 +211,6 @@ class Compute:
                 self.f[2*i+1] += tmp[1] 
 
                 self.damage(i,j)
-
-
 
     def damage(self,i,j):
         z = self.d[i]
@@ -292,10 +282,13 @@ class Compute:
         
             print(" ##### Load step: " + str(iter+self.iter) + " #####")
             self.residual(iter)
-            print("Residual with intial guess",np.linalg.norm(self.wCurrent)-np.linalg.norm(self.uCurrent))
+
+            print("Residual with intial guess",np.linalg.norm(self.f))
 
 
-            residual = np.finfo(np.float).max
+            residual = np.finfo(float).max
+
+            self.computeLoad(iter)
 
             it = 1
             while(residual > epsilion):
@@ -303,11 +296,11 @@ class Compute:
                 self.assemblymatrix()  
 
     
-                b = np.copy(self.f)
+                b = np.copy(self.f + self.b)
             
                 for i in range(0,len(self.fix)):
-                    
-                    index = 2* self.fix[len(self.fix)-1-i]
+                
+                    index = int(2* self.fix[len(self.fix)-1-i])
                     b = np.delete(b,index+1)
                     b = np.delete(b,index)
                     self.matrix = np.delete(self.matrix,index+1,1)
@@ -325,6 +318,10 @@ class Compute:
                     if not i in self.fix: 
                         unew[i] = np.array([res[2*j],res[2*j+1]])
                         j += 1
+                    #elif i in self.loadT:
+                    #    unew[i] = iter* np.array([0,0.125])
+                    #elif i in self.loadB:
+                    #    unew[i] = iter * np.array([0,-.125])
 
                 #plt.scatter(self.nodes[:,0],self.nodes[:,1],c=self.uCurrent[:,1])
                 #plt.colorbar()
@@ -336,9 +333,21 @@ class Compute:
 
                 self.uCurrent += unew
 
-                self.residual(iter)
+                #self.residual(iter)
+                self.computeLoad(iter)
 
-                residual = np.linalg.norm(iter * self.wCurrent) - np.linalg.norm(self.uCurrent) 
+                extension = []
+                
+
+                for i in range(0,len(self.nodes)):
+                    if i in self.loadT or i in self.loadB :
+                        #extension.append(abs(iter*self.wCurrent[i])-abs(self.uCurrent[i]))
+                        extension.append(self.b[i])
+
+                #residual = np.linalg.norm(iter * self.wCurrent) - np.linalg.norm(extension) 
+                #residual = np.linalg.norm(iter * self.wCurrent-extension)
+                residual = np.linalg.norm(extension)
+                #residual = np.linalg.norm(b)
                 print("Iteration ",it," Residual: ",residual)
                 it += 1
 
@@ -398,4 +407,4 @@ class Compute:
 if __name__=="__main__": 
 
     c = Compute(float(sys.argv[1]),int(sys.argv[2]),int(sys.argv[3]))
-    c.solve(1,1e-5)
+    c.solve(500,1e-5)

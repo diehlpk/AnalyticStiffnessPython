@@ -58,7 +58,7 @@ if __name__=="__main__":
 
     for i in range(0,len(nodes)):
         if nodes[i][1] >=0 and nodes[i][1] <= 15:
-            #if uCurrent[i][1] > 1e-4 :
+            
             nodes_small.append(nodes[i])
             u_small.append(uCurrent[i])
             d_small.append(damage[i])
@@ -70,7 +70,7 @@ if __name__=="__main__":
             
           
     ax = plt.gca()
-    plt.scatter(nodes_small[:,0]+u_small[:,0],nodes_small[:,1]+u_small[:,1],c=u_small[:,1],cmap=grayscale_cmap(plt.get_cmap("viridis")),marker="s",s=np.sqrt(30)) 
+    plt.scatter(nodes_small[:,0]+u_small[:,0],nodes_small[:,1]+u_small[:,1],c=u_small[:,1],cmap="seismic",marker="s",s=np.sqrt(30)) 
     #ax.xaxis.tick_top()
     #ax.xaxis.set_label_position('top') 
     fig = plt.gcf()
@@ -86,8 +86,8 @@ if __name__=="__main__":
     plt.savefig("bond-based-2d-plate-"+str(h)+"-"+str(delta_factor)+"-"+str(iter)+"-u-y-rotated-hard.pdf",bbox_inches='tight')
     plt.clf()
 
-    #plt.figure(figsize=(20,1))
-    plt.scatter(nodes_small[:,0],nodes_small[:,1],c=d_small,cmap=grayscale_cmap(plt.get_cmap("viridis")),marker="s",s=np.sqrt(30))
+    #plt.figure(figsize=(20,1)) grayscale_cmap(plt.get_cmap("viridis"))
+    plt.scatter(nodes_small[:,0],nodes_small[:,1],c=d_small,cmap="seismic",marker="s",s=np.sqrt(30))
     ax = plt.gca()
     #ax.xaxis.tick_top()
     #ax.xaxis.set_label_position('top') 
