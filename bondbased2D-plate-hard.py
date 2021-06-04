@@ -251,6 +251,8 @@ class Compute:
 
     def assemblymatrix(self):
         self.matrix = np.zeros((2*len(self.nodes),2*len(self.nodes)),dtype=np.double)
+
+        
         for i in range(0,len(self.nodes)):
             
             for j in self.neighbors[i]:
@@ -281,9 +283,9 @@ class Compute:
 
         
             print(" ##### Load step: " + str(iter+self.iter) + " #####")
-            self.residual(iter)
+            #self.residual(iter)
 
-            print("Residual with intial guess",np.linalg.norm(self.f))
+            #print("Residual with intial guess",np.linalg.norm(self.f))
 
 
             residual = np.finfo(float).max
@@ -296,7 +298,7 @@ class Compute:
                 self.assemblymatrix()  
 
     
-                b = np.copy(self.f + self.b)
+                b = np.copy(self.b)
             
                 for i in range(0,len(self.fix)):
                 
@@ -336,17 +338,18 @@ class Compute:
                 #self.residual(iter)
                 self.computeLoad(iter)
 
-                extension = []
-                
+                extension1 = []
+                extension2 = [] 
 
                 for i in range(0,len(self.nodes)):
                     if i in self.loadT or i in self.loadB :
                         #extension.append(abs(iter*self.wCurrent[i])-abs(self.uCurrent[i]))
-                        extension.append(self.b[i])
+                        extension1.append(iter*self.wCurrent[i])
+                        extension2.append(self.uCurrent[i])
 
-                #residual = np.linalg.norm(iter * self.wCurrent) - np.linalg.norm(extension) 
+                residual = np.linalg.norm(extension1) - np.linalg.norm(extension2) 
                 #residual = np.linalg.norm(iter * self.wCurrent-extension)
-                residual = np.linalg.norm(extension)
+                #residual = np.linalg.norm(extension)
                 #residual = np.linalg.norm(b)
                 print("Iteration ",it," Residual: ",residual)
                 it += 1
