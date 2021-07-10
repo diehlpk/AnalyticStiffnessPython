@@ -7,14 +7,12 @@
 * [matplotlib](https://matplotlib.org/)
 * [shapely](https://pypi.org/project/Shapely/)
 
-## Scripts 
+## Folders 
 
-* ccm-2D.py : Produces the dispalcement fields obtaiend by classical continuums mechanics 
-* bondbased1D.py : Runs the simulation for the one-dimensonal problem
-* bondbased2d.py : RUns the simulation for the two-dimensonal linear elastic problem
-* bondbased2d-tensile.py " Runs the simulation for the two-dimensional fracture problem using a tensile test geometry
-* bondbased2d-plate-soft.py " Runs the simulation for the two-dimensional fracture problem using a pre-cracked square plate with the soft loading (load in force)
-
+* ccm : Scripts for the comparison with classical continuums mechanics 
+* hard : Scripts for the hard loading 
+* soft : Scripts for the soft laoding 
+* tensile : Scripts for the tensile test
 
 ## Usage
 
