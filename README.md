@@ -13,7 +13,7 @@
 * hard : Scripts for the hard loading 
 * soft : Scripts for the soft laoding 
 * tensile : Scripts for the tensile test
-
+* potentials : Different potentials studied in the paper
 ## Usage
 
 ```bash
