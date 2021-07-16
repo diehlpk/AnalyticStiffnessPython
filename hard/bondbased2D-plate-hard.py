@@ -46,17 +46,9 @@ class Compute:
         #index = 0
         for i in range(0,n):
             for j in range(0,n+2*self.delta_factor):
-                self.nodes.append([i*h,(j-self.delta_factor)*h])            
-                #index += 1    
+                self.nodes.append([i*h,(j-self.delta_factor)*h])               
 
         self.nodes = np.array(self.nodes)
-
-        #plt.show()
-        #sys.exit(1)
- 
-        #self.fix = np.sort(self.fix)
-
-        #self.nodes = np.array(self.nodes)
 
         self.V = np.empty(len(self.nodes))
         self.V.fill(h*h)
@@ -64,6 +56,7 @@ class Compute:
         self.d = np.zeros(len(self.nodes))
 
         self.VB = np.pi * self.delta * self.delta
+        
         # Search neighbors
         self.searchNeighbors()
 
@@ -80,25 +73,8 @@ class Compute:
 
             #Apply the boundary load to the extension
 
-            #print(min(self.nodes[:,1]))
-            #scale = 1/7
-
             for i in range(0,len(self.nodes)):
-                #if self.nodes[i][1] <= 0  : #and self.nodes[i][0] < 2.4  :
-                #    self.wCurrentExtension[i][1] = (.125  / 11.5)  * (11.5 -self.nodes[i][1]) 
-                #    self.loadB.append(i)
-                #   
-                #elif self.nodes[i][1] >= 15 : #and self.nodes[i][0] < 2.4 :
-                #    self.wCurrentExtension[i][1] = 0 #-0.125 
-                #    self.loadT.append(i)    
-                #
-                #elif self.nodes[i][1] > 0 and self.nodes[i][1] <= 2.5  :
-                #    self.wCurrentDomain[i][1] = (.125  / 11.5)  * (11.5 -self.nodes[i][1]) 
-                #
-                #elif self.nodes[i][1] < 15 and self.nodes[i][1] >= 2.5  :
-                #    self.wCurrentDomain[i][1] = 0 # (-.125  / 7.5)  * (self.nodes[i][1]-7.5) 
-
-            
+    
                 if self.nodes[i][1] > 7.5 :
                     self.wCurrentExtension[i][1] = (-1e-1 ) * (self.nodes[i][1] - 7.5 ) / 15.5  - 1e-2  #  * (15 - self.nodes[i][0] )  / 15
                     self.loadB.append(i)
@@ -106,23 +82,6 @@ class Compute:
                 if self.nodes[i][1] < 7.5 :
                     self.wCurrentExtension[i][1] = (1e-1 ) * ( -7.5 + self.nodes[i][1]  )  / -15.5  + 1e-2 # * (15 - self.nodes[i][0] )  / 15
                     self.loadT.append(i) 
-
-                #if self.nodes[i][1] >= 15 :
-                #    self.wCurrentExtension[i][1] = -1e-4
-
-                #if self.nodes[i][1] <= 0 :
-                #    self.wCurrentExtension[i][1] = 1e-4
-                
-
-                #if self.nodes[i][0] > 15 - h and self.nodes[i][1] >= 7.5 and self.nodes[i][1] < 7.5 + 1*h  :
-                #    self.fix.append(i)  
-                #    self.wCurrentExtension[i][1] = 0
-                #    print("d")
-
-                #elif self.nodes[i][0] > 15-h  and self.nodes[i][1] < 7.5 and self.nodes[i][1] >= 7.5 - 1*h  :
-                #   self.fix.append(i)
-                #    self.wCurrentExtension[i][1] = 0
-                #    print("d2")
 
                 if self.nodes[i][0] > 15 - h and self.nodes[i][1] > 15  + self.delta - h :
                     self.fix.append(i)  
@@ -133,29 +92,19 @@ class Compute:
                     self.fix.append(i)
                     self.wCurrentExtension[i][1] = 0
                     print("d2")
-                
-
-                #elif self.nodes[i][1] >= 15 and self.nodes[i][0] > 2.4 and  self.nodes[i][0] <= 15  :
-                 #   self.wCurrent[i][1] = -.125 / 5  
-                
-                #elif self.nodes[i][1] <= 0  and  self.nodes[i][0] > 2.4 and  self.nodes[i][0] <= 15   :
-                 #   self.wCurrent[i][1] = .125 / 5
-
-                #else:
-                    #plt.scatter(self.nodes[i][0],self.nodes[i][1],color="red")
 
             self.fix = np.sort(self.fix)
             print(self.fix)
      
-            #self.remove = np.concatenate([self.fix,self.loadT,self.loadB])
-            #self.remove = np.sort(self.remove)
-                
-                    
-            #plt.scatter(self.nodes[:,0],self.nodes[:,1],c= self.wCurrentExtension[:,1],cmap="seismic")
-            #for i in self.fix :
-            #    plt.scatter(self.nodes[i,0],self.nodes[i,1],c="black")
-            #plt.colorbar()
-            #plt.show()
+            #ax = plt.gca()
+            #ax.set_facecolor('#F0F8FF')     
+            #plt.scatter(self.nodes[:,0],self.nodes[:,1],c=-self.wCurrentExtension[:,1],cmap="seismic",marker="s",s=np.sqrt(30))
+            #v = np.linspace(min(self.wCurrentExtension[:,1]), max(self.wCurrentExtension[:,1]), 6, endpoint=True)
+            #clb = plt.colorbar(ticks=v,format='%.1e')
+            #clb.set_label(r'Displacement $w_y$')
+            #plt.xlabel(r"Position $x$")
+            #plt.ylabel(r"Poistion $y$")
+            #plt.savefig("w.pdf",bbox_inches='tight')
             #sys.exit(1)
 
         else:
@@ -172,26 +121,12 @@ class Compute:
         right = np.array([7.5,7.5])
         neighbor = []
 
-
-        #fig = plt.gcf()
-        #fig.set_size_inches(4,50)
-
         for i in range(0,len(self.nodes)):
             self.neighbors.append([])
             for j in range(0,len(self.nodes)):
                 if i != j and self.length(j,i) <= self.delta:
                     if not self.intersect(left,right,self.nodes[i],self.nodes[j]):
                         self.neighbors[i].append(j)
-                        #plt.plot([self.nodes[i][0],self.nodes[j][0]],[self.nodes[i][1],self.nodes[j][1]],c="#91A3B0",alpha=0.15)
-            #neighbor.append(len(self.neighbors[i]))
-
-        #plt.scatter(self.nodes[:,0],self.nodes[:,1],c=neighbor)
-        #plt.xlabel("Position $x$",fontsize = 30)
-        #plt.ylabel("Position $y$",fontsize = 30)
-        #clb = plt.colorbar()
-        #clb.set_label(r'$B_\delta(x)$',labelpad=5)
-        #plt.show()
-        #sys.exit()
 
     def L(self,i,j):
         r = np.sqrt(self.length(i,j)) * self.S(i,j)
@@ -204,9 +139,6 @@ class Compute:
 
         self.uCurrent += iter * self.wCurrentExtension
 
-        #if iter == 1:
-        #self.uCurrent += iter * self.wCurrentDomain
-
         for i in range(0,len(self.nodes)):
             for j in self.neighbors[i]:
                 
@@ -216,13 +148,8 @@ class Compute:
 
         self.uCurrent -= iter * self.wCurrentExtension
 
-        #if iter == 1:
-        #self.uCurrent -= iter * self.wCurrentDomain
-
     def residual(self,iter):
         self.f.fill(0)
-
-        #self.uCurrent =+ iter * self.wCurrent
 
         for i in range(0,len(self.nodes)):
             for j in self.neighbors[i]:
@@ -230,9 +157,6 @@ class Compute:
                 tmp =  self.L(i,j)
                 self.f[2*i] += tmp[0] 
                 self.f[2*i+1] += tmp[1] 
-
-        #self.uCurrent =- iter * self.wCurrent
-
 
     def computeDamage(self):
 
@@ -316,11 +240,7 @@ class Compute:
 
         
             print(" ##### Load step: " + str(iter+self.iter) + " #####")
-            #self.residual(iter)
-
-            #print("Residual with intial guess",np.linalg.norm(self.f))
-
-
+     
             residual = np.finfo(float).max
             residual_old = 0
 
@@ -337,6 +257,7 @@ class Compute:
                     self.matrix = np.delete(self.matrix,index,0)
                     
             it = 1
+            
             while(residual > epsilion):
 
                 
@@ -374,46 +295,15 @@ class Compute:
                     if not i in self.fix: 
                         unew[i] = np.array([res[2*j],res[2*j+1]])
                         j += 1
-                    #elif i in self.loadT:
-                    #    unew[i] = iter* np.array([0,0.125])
-                    #elif i in self.loadB:
-                    #    unew[i] = iter * np.array([0,-.125])
-
-                #plt.scatter(self.nodes[:,0],self.nodes[:,1],c=self.uCurrent[:,1])
-                #plt.colorbar()
-                #plt.xlabel("X")
-                #plt.xlabel("Y")
-                #plt.title("u current")
-                #plt.show()
-
 
                 self.uCurrent += unew
 
-                #self.residual(iter)
                 self.computeLoad(iter)
-                #self.residual(iter)
-
-                #extension1 = []
-                #extension2 = [] 
-
-                #for i in range(0,len(self.nodes)):
-                #    if i in self.loadT or i in self.loadB :
-                #        #extension.append(abs(iter*self.wCurrentExtension[i])-abs(self.uCurrent[i]))
-                #        extension1.append(iter*abs(self.wCurrentExtension[i]))
-                #        extension2.append(self.uCurrent[i])
-
-                #print(np.linalg.norm(extension1),np.linalg.norm(extension2))
-                #residual = np.linalg.norm(extension1) - np.linalg.norm(extension2) 
-                #residual = np.linalg.norm(iter * self.wCurrent-extension)
-                #residual = np.linalg.norm(extension)
-                #residual = np.linalg.norm(self.b+self.f)
+        
                 residual = np.linalg.norm(self.uCurrent) - residual_old
                 residual_old = np.linalg.norm(self.uCurrent)
                 print("Iteration ",it," Residual: ",residual)
                 it += 1
-
-                #if it == 10 :
-                #    break
 
             self.computeDamage()
             self.plot(iter)
