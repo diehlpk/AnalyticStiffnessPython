@@ -4,6 +4,7 @@ import pickle
 import sys
 from matplotlib import rc
 from matplotlib.colors import LinearSegmentedColormap
+import matplotlib as mpl
 
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
@@ -72,8 +73,8 @@ if __name__=="__main__":
         else:
             d_pos.append(nodes[i,0]+u_small[i][0])
 
-    print(max(d_pos))
-    print(d_pos)
+    #print(max(d_pos))
+    #print(d_pos)
 
     nodes_small = np.array(nodes_small)
     u_small = np.array(u_small)
@@ -85,7 +86,7 @@ if __name__=="__main__":
             
           
     ax = plt.gca()
-    plt.scatter(nodes_small[:,0]+u_small[:,0],nodes_small[:,1]+u_small[:,1],c=u_small[:,1],cmap=grayscale_cmap("viridis"),marker="s",s=np.sqrt(30)) 
+    plt.scatter(nodes_small[:,0]+u_small[:,0],nodes_small[:,1]+u_small[:,1],c=u_small[:,1],cmap=grayscale_cmap("viridis"),marker="s",s=np.sqrt(40)) 
     #ax.xaxis.tick_top()
     #ax.xaxis.set_label_position('top') 
     fig = plt.gcf()
@@ -102,7 +103,14 @@ if __name__=="__main__":
     plt.clf()
 
     #plt.figure(figsize=(20,1)) grayscale_cmap(plt.get_cmap("viridis"))
-    plt.scatter(nodes_small[:,0],nodes_small[:,1],c=d_small,cmap=grayscale_cmap("viridis"),marker="s",s=np.sqrt(30))
+
+    #cmap = mpl.cm.coolwarm
+    #bounds = [-1, 2, 5, 7, 12, 15]
+    #bounds = [0,2.1e-1,8.2e-1,1.9,5.0,6.4]
+    #norm = mpl.colors.BoundaryNorm(bounds, cmap.N, extend='both')
+
+
+    plt.scatter(nodes_small[:,0],nodes_small[:,1],c=d_small,cmap="coolwarm",marker="s",s=np.sqrt(30),vmin=0,vmax=6.4)
     ax = plt.gca()
     #ax.xaxis.tick_top()
     #ax.xaxis.set_label_position('top') 
@@ -112,10 +120,15 @@ if __name__=="__main__":
     plt.ylabel(r"Poistion $y$")
     #plt.ylim([-2,21])
     #plt.xlim([0,max(nodes[:,1])])
-    v = np.linspace(min(d_small), max(d_small), 6, endpoint=True)
+    #v = np.linspace(min(d_small), max(d_small), 6, endpoint=True)
+    v =  np.linspace(0, 6.4, 6, endpoint=True)
+    #v = [0,2.1e-1,8.2e-1,1,1.9,5.0,6.4]
     clb = plt.colorbar(ticks=v,format='%.1e')
     clb.set_label(r'Damage')
-    ax.hlines(y=7.5, xmin=0, xmax=7.5, linewidth=2, color='#FF7E00')
+    #cmap = mpl.cm.coolwarm
+    #norm = mpl.colors.Normalize(vmin=5, vmax=10)
+    #fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap))
+    ax.hlines(y=7.5, xmin=0, xmax=7.5, linewidth=2, color='black')
     plt.savefig("bond-based-2d-plate-"+str(h)+"-"+str(delta_factor)+"-"+str(iter)+"-d-rotated-hard.pdf",bbox_inches='tight')
 
 
