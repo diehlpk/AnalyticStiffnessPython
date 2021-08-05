@@ -40,10 +40,10 @@ if __name__=="__main__":
     nodes = []
 
 
-    filehandler = open("bond-based-2d-tensile-"+str(h)+"-"+str(delta_factor)+"-"+str(iter)+"-displacement.npy", "rb")
+    filehandler = open("../bond-based-2d-tensile-"+str(h)+"-"+str(delta_factor)+"-"+str(iter)+"-displacement.npy", "rb")
     uCurrent = np.load(filehandler, allow_pickle=True)
 
-    filehandler = open("bond-based-2d-tensile-"+str(h)+"-"+str(delta_factor)+"-"+str(iter)+"-damage.npy", "rb")
+    filehandler = open("../bond-based-2d-tensile-"+str(h)+"-"+str(delta_factor)+"-"+str(iter)+"-damage.npy", "rb")
     damage = np.load(filehandler, allow_pickle=True)
 
 
@@ -81,7 +81,7 @@ if __name__=="__main__":
     plt.clf()
 
     plt.figure(figsize=(20,1))
-    plt.scatter(nodes[:,1],nodes[:,0],c=damage,cmap=grayscale_cmap(plt.get_cmap("viridis")))
+    plt.scatter(nodes[:,1],nodes[:,0],c=damage,cmap="coolwarm",vmin=0,vmax=1.4)
     ax = plt.gca()
     ax.xaxis.tick_top()
     ax.xaxis.set_label_position('top') 

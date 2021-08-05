@@ -188,6 +188,6 @@ class Compute:
 
 if __name__=="__main__": 
 
-    c = Compute(1/4)
+    c = Compute(0.5)
     c.solve(1000000,1e-11)
-    #c.plot()
+    c.plot()
