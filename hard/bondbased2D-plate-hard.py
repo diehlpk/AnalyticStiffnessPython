@@ -50,6 +50,12 @@ class Compute:
 
         self.nodes = np.array(self.nodes)
 
+        filehandler = open("bond-based-2d-plate-"+str(self.h)+"-"+str(self.delta_factor)+"-"+"-nodes-hard.npy", "wb")
+        np.save(filehandler,self.nodes)
+
+        sys.exit(1)
+
+
         self.V = np.empty(len(self.nodes))
         self.V.fill(h*h)
 

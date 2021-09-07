@@ -1,4 +1,4 @@
-# Quasistatic Fracture using Nonliner-Nonlocal Elastostatics with an Analytic Tangent Stiffness Matrix
+# Quasistatic Fracture using Nonliner-Nonlocal Elastostatics with an Explicit Tangent Stiffness Matrix
 
 ## Dependencies
 
