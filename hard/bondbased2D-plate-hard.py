@@ -50,11 +50,6 @@ class Compute:
 
         self.nodes = np.array(self.nodes)
 
-        filehandler = open("bond-based-2d-plate-"+str(self.h)+"-"+str(self.delta_factor)+"-"+"-nodes-hard.npy", "wb")
-        np.save(filehandler,self.nodes)
-
-        sys.exit(1)
-
 
         self.V = np.empty(len(self.nodes))
         self.V.fill(h*h)
@@ -102,22 +97,8 @@ class Compute:
             self.fix = np.sort(self.fix)
             print(self.fix)
      
-            #ax = plt.gca()
-            #ax.set_facecolor('#F0F8FF')     
-            #plt.scatter(self.nodes[:,0],self.nodes[:,1],c=-self.wCurrentExtension[:,1],cmap="seismic",marker="s",s=np.sqrt(30))
-            #v = np.linspace(min(self.wCurrentExtension[:,1]), max(self.wCurrentExtension[:,1]), 6, endpoint=True)
-            #clb = plt.colorbar(ticks=v,format='%.1e')
-            #clb.set_label(r'Displacement $w_y$')
-            #plt.xlabel(r"Position $x$")
-            #plt.ylabel(r"Poistion $y$")
-            #plt.savefig("w.pdf",bbox_inches='tight')
-            #sys.exit(1)
-
         else:
             print("Restart not implemented yet")
-            #filehandler = open("bond-based-2d-plate-"+str(self.h)+"-"+str(self.delta_factor)+"-"+str(self.iter-1)+"-displacement.npy", "rb")
-            #self.nodes += np.load(filehandler)
-            #self.uCurrent = np.load(filehandler)
 
         print("Matrix size "+str(2*len(self.nodes))+"x"+str(2*len(self.nodes)))
      

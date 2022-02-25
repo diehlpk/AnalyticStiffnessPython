@@ -65,16 +65,26 @@ if __name__=="__main__":
             d_small.append(damage[i])
 
     max_d = max(d_small)
+    max_i = d_small.index(max_d)
+    print(nodes_small[max_i][0])
     d_pos = []
+    d_index = []
    
     for i in range(0,len(d_small)):
-        if d_small[i] <= 0.75 * max_d :
+        if d_small[i] <= 0.75 * max_d:
             d_small[i] = 0
         else:
+            d_index.append(nodes_small[i][0])
             d_pos.append(nodes[i,0]+u_small[i][0])
-
+   
     #print(max(d_pos))
     #print(d_pos)
+    max_x = max(d_index)
+    print(max_x)
+
+    for i in range(0,len(d_small)):
+        if nodes_small[i][0] < nodes_small[max_i][0]:
+            d_small[i] = 0
 
     nodes_small = np.array(nodes_small)
     u_small = np.array(u_small)
@@ -124,11 +134,15 @@ if __name__=="__main__":
     v =  np.linspace(0, 6.4, 6, endpoint=True)
     #v = [0,2.1e-1,8.2e-1,1,1.9,5.0,6.4]
     clb = plt.colorbar(ticks=v,format='%.1e')
-    clb.set_label(r'Damage')
+    clb.set_label(r'Strain ratio w.r.t critical strain')
     #cmap = mpl.cm.coolwarm
     #norm = mpl.colors.Normalize(vmin=5, vmax=10)
     #fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap))
-    ax.hlines(y=7.5, xmin=0, xmax=7.5, linewidth=2, color='black')
+    ax.hlines(y=7.5, xmin=0, xmax=nodes_small[max_i][0], linewidth=2, color='black')
+    ax.vlines(x=nodes_small[max_i][0], ymin=7.2, ymax=7.8, color='white')
+    plt.text(nodes_small[max_i][0], 8, r'crack tip', fontsize=8, color='white', horizontalalignment='center')
+    ax.hlines(y=7, xmin=nodes_small[max_i][0], xmax=max_x, color='white')
+    plt.text(0.5*(nodes_small[max_i][0]+max_x), 6.4, r'process zone', fontsize=8, color='white', horizontalalignment='center')
     plt.savefig("bond-based-2d-plate-"+str(h)+"-"+str(delta_factor)+"-"+str(iter)+"-d-rotated-hard.pdf",bbox_inches='tight')
 
 
