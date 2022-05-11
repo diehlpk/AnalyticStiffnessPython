@@ -1,6 +1,8 @@
 # Quasistatic Fracture using Nonliner-Nonlocal Elastostatics with an Explicit Tangent Stiffness Matrix
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/0e3012d373d24b47bdc85345edc46a22)](https://www.codacy.com/gh/diehlpk/AnalyticStiffnessPython/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=diehlpk/AnalyticStiffnessPython&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/0e3012d373d24b47bdc85345edc46a22)](https://www.codacy.com/gh/diehlpk/AnalyticStiffnessPython/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=diehlpk/AnalyticStiffnessPython&amp;utm_campaign=Badge_Grade) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5484312.svg)](https://doi.org/10.5281/zenodo.5484312)
+
+
 
 ## Dependencies
 
