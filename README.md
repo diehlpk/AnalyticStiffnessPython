@@ -25,3 +25,6 @@ python3 -m venv deps
 source deps/bin/activate
 pip install -r requirements.txt
 ```
+## References
+
+1. Diehl, Patrick, and Robert Lipton. "Quasistatic Fracture using Nonlinear‐Nonlocal Elastostatics with Explicit Tangent Stiffness Matrix." International Journal for Numerical Methods in Engineering (2021). [Link](https://onlinelibrary.wiley.com/doi/abs/10.1002/nme.7005}, [Preprint](https://doi.org/10.31224/osf.io/3je6b)
